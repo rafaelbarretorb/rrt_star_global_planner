@@ -11,6 +11,7 @@
 #include <base_local_planner/costmap_model.h>
 
 #include <cmath>
+#include <tuple>
 
 using std::string;
 
@@ -20,7 +21,8 @@ using std::string;
 struct Node {
 	float x;
   float y;
-	int parent_index;
+  int node_id;
+	int parent_id;
   float cost;
 }; 
 
