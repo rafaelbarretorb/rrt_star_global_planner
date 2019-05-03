@@ -59,8 +59,11 @@ namespace RRTstar_planner
 
   bool RRTstarPlannerROS::makePlan()
   {
-    float x_dim = this->XDIM;
-    float y_dim = this->YDIM;
+    //float x_dim = this->XDIM;
+    //float y_dim = this->YDIM;
+
+    float x_dim = 20.0;
+    float y_dim = 20.0;
 
     std::vector<Node> nodes;
     std::vector<float> x_rand(2);
@@ -133,7 +136,7 @@ namespace RRTstar_planner
 
   }
 
-  float RRTstarPlannerROS::distance(px1, py1, px2, py2)
+  float RRTstarPlannerROS::distance(float px1, float py1, float px2, float py2)
   {
     float dist = sqrt((px1 - px2)*(px1 - px2) + (py1 - py2)*(py1 - py2));
     return dist;
@@ -185,7 +188,7 @@ cell_row = int((y - self.MAP.info.origin.position.y) / self.MAP.info.resolution)
 
 
   //check if point collides with the obstacle
-  bool RRTstarPlannerROS::collision(wx, wy)
+  bool RRTstarPlannerROS::collision(float wx, float wy)
   {
     int mx, my;
     worldToMap(wx, wy, mx, my);
@@ -199,19 +202,19 @@ cell_row = int((y - self.MAP.info.origin.position.y) / self.MAP.info.resolution)
 
     return false;
   }
-
-std::tuple<Node, int> RRTstarPlannerROS::getNearest(nodes, x_rand)
-{
-  Node node = nodes[0];
-  for (int i = 1; i < nodes.size(); i++)
+  
+  Node RRTstarPlannerROS::getNearest(std::vector<Node> nodes, std::vector<float> x_rand)
   {
-    if (this->distance(nodes[i].x, nodes[i].y, x_rand[0], x_rand[1]) < this->distance(node.x, node.y, x_rand[0], x_rand[1]))
-      node = nodes[i];
+    Node node = nodes[0];
+    for (int i = 1; i < nodes.size(); i++)
+    {
+      if (this->distance(nodes[i].x, nodes[i].y, x_rand[0], x_rand[1]) < this->distance(node.x, node.y, x_rand[0], x_rand[1]))
+        node = nodes[i];
+    }
+  
+    return node;
   }
-
-  return node;
-}
-
+  
 
   Node RRTstarPlannerROS::chooseParent(Node nn, Node newnode, std::vector<Node> nodes)
   {
@@ -265,6 +268,38 @@ std::tuple<Node, int> RRTstarPlannerROS::getNearest(nodes, x_rand)
       x_new[1] = y1 + this->epsilon_max*sin(theta);
       return x_new;
     }
+  }
+
+  bool RRTstarPlannerROS::obstacleFree(Node node_nearest, std::vector<float> x_rand)
+  {
+    int n = 1;
+    float = theta;
+    std::vector<float> x_n = {0.0, 0.0};
+    float dist = this->distance(node_nearest.x, node_nearest.y, x_rand[0], x_rand[1]);
+    if (dist < this->obs_resolution)
+    {
+      if (this->collision(x_rand))
+        return false;
+      else
+        return true;
+    }
+    else
+    {
+      int value = int(floor(dist/this->obs_resolution));
+      float theta;
+      for (int i = 0;i < value; i++)
+      {
+        theta = atan2(node_nearest.y - x_rand[1], node_nearest.x - x_rand[0]);
+        x_n[0] = node_nearest.x + n*this->obs_resolution*cos(theta);
+        x_n[1] = node_nearest.y + n*this->obs_resolution*sin(theta);
+        if (this->collision(x_n))
+          return false;
+        
+        n++;
+      }
+      return true;
+    }
+    
   }
 
 } // RRTstar_planner namespace

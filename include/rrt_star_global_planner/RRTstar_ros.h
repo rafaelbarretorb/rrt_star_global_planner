@@ -11,6 +11,7 @@
 #include <base_local_planner/costmap_model.h>
 
 #include <cmath>
+#include <math.h>
 #include <tuple>
 
 using std::string;
