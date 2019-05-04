@@ -32,7 +32,7 @@ namespace RRTstar_planner
 	    height = costmap_->getSizeInCellsY();
 	    resolution = costmap_->getResolution();
 	    mapSize = width*height;
-	    tBreak = 1+1/(mapSize); 
+	    tBreak = 1+1/(mapSize); // ????
 	    value = 0;
 
 
@@ -57,83 +57,105 @@ namespace RRTstar_planner
       ROS_WARN("This planner has already been initialized... doing nothing");
   }
 
-  bool RRTstarPlannerROS::makePlan()
+  bool RRTstarPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
+                const geometry_msgs::PoseStamped& goal,
+                std::vector<geometry_msgs::PoseStamped>& plan)
   {
+    std::vector<Node> nodes;
     //float x_dim = this->XDIM;
     //float y_dim = this->YDIM;
 
     float x_dim = 20.0;
     float y_dim = 20.0;
 
-    std::vector<Node> nodes;
-    std::vector<float> x_rand(2);
-    std::vector<float> x_new(2);
-    Node node_nearest;
-    while (nodes.size() < this -> max_num_nodes)
+    Node start_node;
+    start_node.x = start.pose.position.x;
+    start_node.y = start.pose.position.y;
+    start_node.node_id = 0;
+    start_node.parent_id = -1; // None parent node
+    start_node.cost = 0.0;
+
+    nodes.push_back(start_node);
+    
+    std::pair<float, float> p_rand;
+    std::pair<float, float> p_new;
+
+    Node n_nearest;
+    while (nodes.size() < MAX_NUM_NODES)
     {
       bool found_next = false;
       while (found_next == false)
       {
-        x_rand = this->sampleFree(x_dim, y_dim);
-        x_nearest = this->getNearest(nodes, x_rand);
-        x_new = this->steer(node_nearest.x, node_nearest.y, x_rand[0], x_rand[1]);
-        if (this->obstacleFree(node_nearest, x_new))
+        p_rand = sampleFree(x_dim, y_dim); // random point in the free space
+        node_nearest = getNearest(nodes, x_rand); // The nearest node of the random point
+        p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
+        if (obstacleFree(node_nearest, p_new))
         {
           Node newnode;
-          newnode.x = x_new[0];
-          newnode.y = x_new[1];
-          newnode.node_id = int(nodes.size()); // index of the last element after the push_bask below
-          newnode.parent_id = x_nearest.node_id;
+          newnode.x = x_new.first;
+          newnode.y = x_new.second;
+          newnode.node_id = nodes.size(); // index of the last element after the push_bask below
+          newnode.parent_id = node_nearest.node_id;
           newnode.cost = 0.0;
 
-          newnode = this->chooseParent(x_nearest, newnode, nodes);
+          // Optimize
+          newnode = chooseParent(node_nearest, newnode, nodes); // Select the best parent
           nodes.push_back(newnode);
-          nodes->this->rewire(nodes, newnode);
+          nodes = rewire(nodes, newnode); 
           found_next = true;
+        }
+      }
+      // Check if the distance between the goal and the new node is less than
+      // the GOAL_RADIUS
+      if (pointCircleCollision(p_new.first, p_new.second, goal.pose.position.x , goal.pose.position.y, GOAL_RADIUS) && nodes.size() > 5000)
+      {
+        std::vector<float> path_x;
+        std::vector<float> path_y;
+
+        std::vector<std::pair<float, float>> path;
+        
+        // New goal inside of the goal tolerance
+        Node new_goal_node = nodes[nodes.size() - 1];
+        Node current_node = new_goal_node;
+
+        current_node = new_goal_node;
+        // Final Path
+        while (current_node.parent_id != -1)
+        {
+          path_x.insert(path_x.begin(), current_node.x);
+          path_y.insert(path_y.begin(), current_node.y); 
+      
+          current_node = nodes[current_node.parent_id];
         }
 
       }
     }
 
-
-
-
-
-
-
     //if the global planner find a path
-    if ( bestPath.size()>0)
+    if (path_x.size() > 0)
     {
-    
-      // convert the path
-    
-      for (int i = 0; i < bestPath.size(); i++)
+      ros::Time plan_time = ros::Time::now();
+      // convert the points to poses
+      for (int i = 0; i < path_x.size(); i++)
       {
-      
-        float x = 0.0;
-        float y = 0.0;
-      
-        int index = bestPath[i];
-      
-        convertToCoordinate(index, x, y);
-      
-        geometry_msgs::PoseStamped pose = goal;
-      
-        pose.pose.position.x = x;
-        pose.pose.position.y = y;
+        geometry_msgs::PoseStamped pose;
+        pose.header.stamp = plan_time;
+        pose.header.frame_id = global_frame;
+        pose.pose.position.x = path_x[i];
+        pose.pose.position.y = path_y[i];
         pose.pose.position.z = 0.0;
-      
         pose.pose.orientation.x = 0.0;
         pose.pose.orientation.y = 0.0;
         pose.pose.orientation.z = 0.0;
         pose.pose.orientation.w = 1.0;
-      
         plan.push_back(pose);
       }
     }
-
-
-
+    else
+    {
+      ROS_WARN("The planner failed to find a path, choose other goal position");
+      return false;
+    }
   }
 
   float RRTstarPlannerROS::distance(float px1, float py1, float px2, float py2)
@@ -151,13 +173,6 @@ namespace RRTstar_planner
     std::vector<float> x_rand = {x,y};
     return x_rand; 
   }
-
-  std::vector<int> worldToMap()
-  {
-    int cell_column = int((x - originX) / resolution);
-    return 
-  }
-
 
   void RRTstarPlannerROS::mapToWorld(double mx, double my, double& wx, double& wy) 
   {
@@ -180,12 +195,6 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
 
     return false;
 }
-
-      # get the cell coord of the center point of the robot
-    def world_to_map(self, x, y):
-        cell_column = int((x - self.MAP.info.origin.position.x) / self.MAP.info.resolution)
-cell_row = int((y - self.MAP.info.origin.position.y) / self.MAP.info.resolution)
-
 
   //check if point collides with the obstacle
   bool RRTstarPlannerROS::collision(float wx, float wy)
@@ -214,7 +223,6 @@ cell_row = int((y - self.MAP.info.origin.position.y) / self.MAP.info.resolution)
   
     return node;
   }
-  
 
   Node RRTstarPlannerROS::chooseParent(Node nn, Node newnode, std::vector<Node> nodes)
   {
@@ -245,10 +253,8 @@ cell_row = int((y - self.MAP.info.origin.position.y) / self.MAP.info.resolution)
       {
         node.parent = newnode.node_id;
         node.cost = newnode.cost + this->distance(node.x, node.y, newnode.x, newnode.y);
-        node[i] = node;
       }
     }
-    
     return nodes;
   }
 
@@ -299,7 +305,5 @@ cell_row = int((y - self.MAP.info.origin.position.y) / self.MAP.info.resolution)
       }
       return true;
     }
-    
   }
-
 } // RRTstar_planner namespace
