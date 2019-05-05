@@ -1,6 +1,15 @@
 /** include the libraries you need in your planner here */
 /* for global path planner interface */
 
+
+
+#include <nav_msgs/Path.h>
+#include <vector>
+#include <nav_core/base_global_planner.h>
+#include <nav_msgs/GetPlan.h>
+#include <dynamic_reconfigure/server.h>
+
+
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
@@ -36,6 +45,10 @@ namespace RRTstar_planner
       float XDIM;
       float YDIM;
       int MAX_NUM_NODES;
+      float RADIUS;
+      float GOAL_RADIUS;
+      float epsilon_min;
+      float epsilon_max;
 
       RRTstarPlannerROS();
       RRTstarPlannerROS(std::string name, costmap_2d::Costmap2DROS∗ costmap_ros);
@@ -72,6 +85,17 @@ namespace RRTstar_planner
     private:
       void mapToWorld(double mx, double my, double& wx, double& wy);
       bool worldToMap(double wx, double wy, double& mx, double& my);
+
+      float originX;
+      float originY;
+      float resolution;
+      costmap_2d::Costmap2DROS* costmap_ros_;
+      double step_size_, min_dist_from_robot_;
+      costmap_2d::Costmap2D* costmap_;
+      //base_local_planner::WorldModel* world_model_;
+      bool initialized_;
+      int width;
+int height;
 
   };
 };

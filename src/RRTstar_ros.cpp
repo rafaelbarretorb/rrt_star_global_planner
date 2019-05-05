@@ -1,22 +1,40 @@
 /*
   planner_core.h
+  RRTstar_ros.cpp
 
 */
 
 #include <rrt_star_global_planner/RRTstar_ros.h>
+#include <pluginlib/class_list_macros.h>
+#include <costmap_2d/cost_values.h>
+#include <costmap_2d/costmap_2d.h>
 
 std::random_device rd;
 static std::default_random_engine generator ( rd() );
 
+//register this planner as a BaseGlobalPlanner plugin
+PLUGINLIB_EXPORT_CLASS(RRTstar_planner::RRTstarPlannerROS, nav_core::BaseGlobalPlanner)
+
 namespace RRTstar_planner
 {
 
-  RRTstarPlannerROS::RRTstarPlannerROS()
-  {
-
+  RRTstarPlannerROS::RRTstarPlannerROS() :
+          costmap_(NULL), initialized_(false), allow_unknown_(true) {
   }
 
-  void RRTstarPlannerROS::initialize()
+  RRTstarPlannerROS::RRTstarPlannerROS(std::string name, costmap_2d::Costmap2D* costmap, std::string frame_id) :
+          costmap_(NULL), initialized_(false), allow_unknown_(true) 
+  {
+      //initialize the planner
+      initialize(name, costmap, frame_id);
+  }
+
+  void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros) 
+  {
+      initialize(name, costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID());
+  }
+
+  void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS∗ costmap_ros)
   {
 
     if (!initialized_)
@@ -35,20 +53,11 @@ namespace RRTstar_planner
 	    tBreak = 1+1/(mapSize); // ????
 	    value = 0;
 
+      RADIUS = 1.0;
+      GOAL_RADIUS = 0.5;
+      epsilon_min = 0.05;
+      epsilon_max = 0.1;
 
-	    OGM = new bool [mapSize]; 
-      for (unsigned int iy = 0; iy < costmap_->getSizeInCellsY(); iy++)
-      {
-        for (unsigned int ix = 0; ix < costmap_->getSizeInCellsX(); ix++)
-        {
-          unsigned int cost = static_cast<int>(costmap_->getCost(ix, iy));
-          //cout<<cost;
-          if (cost == 0)
-            OGM[iy*width+ix]=true;
-          else
-            OGM[iy*width+ix]=false;
-        }
-      }
 
       ROS_INFO("RRT* planner initialized successfully");
       initialized_ = true;
@@ -80,7 +89,7 @@ namespace RRTstar_planner
     std::pair<float, float> p_rand;
     std::pair<float, float> p_new;
 
-    Node n_nearest;
+    Node node_nearest;
     while (nodes.size() < MAX_NUM_NODES)
     {
       bool found_next = false;
@@ -109,10 +118,8 @@ namespace RRTstar_planner
       // the GOAL_RADIUS
       if (pointCircleCollision(p_new.first, p_new.second, goal.pose.position.x , goal.pose.position.y, GOAL_RADIUS) && nodes.size() > 5000)
       {
-        std::vector<float> path_x;
-        std::vector<float> path_y;
-
         std::vector<std::pair<float, float>> path;
+        std::pair<float, float> point;
         
         // New goal inside of the goal tolerance
         Node new_goal_node = nodes[nodes.size() - 1];
@@ -122,8 +129,9 @@ namespace RRTstar_planner
         // Final Path
         while (current_node.parent_id != -1)
         {
-          path_x.insert(path_x.begin(), current_node.x);
-          path_y.insert(path_y.begin(), current_node.y); 
+          point.first = current_node.x;
+          point.second = current_node.y;
+          path.insert(path.begin(), point); 
       
           current_node = nodes[current_node.parent_id];
         }
@@ -132,17 +140,17 @@ namespace RRTstar_planner
     }
 
     //if the global planner find a path
-    if (path_x.size() > 0)
+    if (path.size() > 0)
     {
       ros::Time plan_time = ros::Time::now();
       // convert the points to poses
-      for (int i = 0; i < path_x.size(); i++)
+      for (int i = 0; i < path.size(); i++)
       {
         geometry_msgs::PoseStamped pose;
         pose.header.stamp = plan_time;
         pose.header.frame_id = global_frame;
-        pose.pose.position.x = path_x[i];
-        pose.pose.position.y = path_y[i];
+        pose.pose.position.x = path[i].first;
+        pose.pose.position.y = path[i].second;
         pose.pose.position.z = 0.0;
         pose.pose.orientation.x = 0.0;
         pose.pose.orientation.y = 0.0;
@@ -164,14 +172,16 @@ namespace RRTstar_planner
     return dist;
   }
 
-  std::vector<float> RRTstarPlannerROS::sampleFree(float x_dim, float y_dim)
+  std::pair<float, float> RRTstarPlannerROS::sampleFree(float x_dim, float y_dim)
   {
     float MAX_RANDOM_NUMBER = 1.0;
 
     float x = (distribution(generator) - MAX_RANDOM_NUMBER/2)*x_dim;
     float y = (distribution(generator) - MAX_RANDOM_NUMBER/2)*y_dim;
-    std::vector<float> x_rand = {x,y};
-    return x_rand; 
+    std::pair<float, float> p_rand;
+    p_rand.first = x;
+    p_rand.second = y;
+    return p_rand; 
   }
 
   void RRTstarPlannerROS::mapToWorld(double mx, double my, double& wx, double& wy) 
@@ -206,7 +216,7 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
       return true;
 
     // grid[row][column] = vector[row*WIDTH + column]
-    if (costmap_ros_[my*this->width + mx] > 0)
+    if (costmap_[my*this->width + mx] > 0)
       return true;
 
     return false;
@@ -228,11 +238,11 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
   {
     for (int i = 0; i < nodes.size(); i++)
     {
-      if (this->distance(nodes[i].x, nodes[i].y, newnode.x, newnode.y) < RADIUS &&
-         nodes.[i].cost + this->distance(nodes[i].x, nodes[i].y, newnode.x, newnode.y) < nn.cost + distance(nn.x, nn.y, newnode.x, newnode.y) &&
-         this->obstacleFree(node, nn.x, nn.y))
+      if (distance(nodes[i].x, nodes[i].y, newnode.x, newnode.y) < RADIUS &&
+         nodes[i].cost + distance(nodes[i].x, nodes[i].y, newnode.x, newnode.y) < nn.cost + distance(nn.x, nn.y, newnode.x, newnode.y) &&
+         obstacleFree(nodes[i], nn.x, nn.y))
       {
-        nn = node;
+        nn = nodes[i];
       }
       newnode.cost = nn.cost + this->distance(nn.x, nn.y, newnode.x, newnode.y);
       newnode.parent_id = nn.node_id;
@@ -258,21 +268,22 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
     return nodes;
   }
 
-  std::vector<float> RRTstarPlannerROS::steer(float x1, float y1, float x2, float y2)
+  std::pair<float, float> RRTstarPlannerROS::steer(float x1, float y1, float x2, float y2)
   {
-    std::vector<float> x_new(2);
-    float dist = this->distance(x1, y1, x2, y2)
+    std::pair<float, float> p_new;
+    float dist = this->distance(x1, y1, x2, y2);
     if (dist < this->epsilon_max && dist > this->epsilon_min)
     {
-      x_new = {x2, y2};
-      return x_new;
+      p_new.first = x1;
+      p_new.second = y1;
+      return p_new;
     }
     else
     {
       float theta = atan2(y2-y1, x2-x1);
-      x_new[0] = x1 + this->epsilon_max*cos(theta);
-      x_new[1] = y1 + this->epsilon_max*sin(theta);
-      return x_new;
+      p_new.first = x1 + this->epsilon_max*cos(theta);
+      p_new.second = y1 + this->epsilon_max*sin(theta);
+      return p_new;
     }
   }
 
@@ -284,7 +295,7 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
     float dist = this->distance(node_nearest.x, node_nearest.y, x_rand[0], x_rand[1]);
     if (dist < this->obs_resolution)
     {
-      if (this->collision(x_rand))
+      if (collision(x_rand))
         return false;
       else
         return true;
