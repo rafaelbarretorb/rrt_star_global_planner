@@ -1,13 +1,11 @@
 /*
-  planner_core.h
   RRTstar_ros.cpp
 
 */
 
 #include <rrt_star_global_planner/RRTstar_ros.h>
 #include <pluginlib/class_list_macros.h>
-#include <costmap_2d/cost_values.h>
-#include <costmap_2d/costmap_2d.h>
+#include <iostream>
 
 std::random_device rd;
 static std::default_random_engine generator ( rd() );
@@ -18,29 +16,24 @@ PLUGINLIB_EXPORT_CLASS(RRTstar_planner::RRTstarPlannerROS, nav_core::BaseGlobalP
 namespace RRTstar_planner
 {
 
-  RRTstarPlannerROS::RRTstarPlannerROS() :
-          costmap_(NULL), initialized_(false), allow_unknown_(true) {
-  }
+  RRTstarPlannerROS::RRTstarPlannerROS() 
+          : costmap_(nullptr), initialized_(false) { }
 
-  RRTstarPlannerROS::RRTstarPlannerROS(std::string name, costmap_2d::Costmap2D* costmap, std::string frame_id) :
-          costmap_(NULL), initialized_(false), allow_unknown_(true) 
+  RRTstarPlannerROS::RRTstarPlannerROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros) 
+        : costmap_ros_(costmap_ros)
   {
       //initialize the planner
-      initialize(name, costmap, frame_id);
+      initialize(name, costmap_ros);
   }
 
-  void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros) 
-  {
-      initialize(name, costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID());
-  }
-
-  void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS∗ costmap_ros)
+  void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
   {
 
     if (!initialized_)
     {
+      // Initialize map
       costmap_ros_ = costmap_ros;
-      costmap_ = costmap_ros_->getCostmap();
+      costmap_ = costmap_ros->getCostmap();
   
       ros::NodeHandle private_nh("~/" + name);
   
@@ -49,15 +42,11 @@ namespace RRTstar_planner
 	    width = costmap_->getSizeInCellsX();
 	    height = costmap_->getSizeInCellsY();
 	    resolution = costmap_->getResolution();
-	    mapSize = width*height;
-	    tBreak = 1+1/(mapSize); // ????
-	    value = 0;
 
       RADIUS = 1.0;
       GOAL_RADIUS = 0.5;
       epsilon_min = 0.05;
       epsilon_max = 0.1;
-
 
       ROS_INFO("RRT* planner initialized successfully");
       initialized_ = true;
@@ -70,12 +59,16 @@ namespace RRTstar_planner
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan)
   {
-    std::vector<Node> nodes;
-    //float x_dim = this->XDIM;
-    //float y_dim = this->YDIM;
+    //clear the plan, just in case
+    plan.clear();
 
-    float x_dim = 20.0;
-    float y_dim = 20.0;
+    std::vector<std::pair<float, float>> path;
+    ros::NodeHandle n;
+    std::string global_frame = frame_id_;
+
+    std::vector<Node> nodes;
+
+    MAX_NUM_NODES = 20000;
 
     Node start_node;
     start_node.x = start.pose.position.x;
@@ -95,14 +88,14 @@ namespace RRTstar_planner
       bool found_next = false;
       while (found_next == false)
       {
-        p_rand = sampleFree(x_dim, y_dim); // random point in the free space
-        node_nearest = getNearest(nodes, x_rand); // The nearest node of the random point
+        p_rand = sampleFree(); // random point in the free space
+        node_nearest = getNearest(nodes, p_rand); // The nearest node of the random point
         p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
-        if (obstacleFree(node_nearest, p_new))
+        if (obstacleFree(node_nearest, p_new.first, p_new.second))
         {
           Node newnode;
-          newnode.x = x_new.first;
-          newnode.y = x_new.second;
+          newnode.x = p_new.first;
+          newnode.y = p_new.second;
           newnode.node_id = nodes.size(); // index of the last element after the push_bask below
           newnode.parent_id = node_nearest.node_id;
           newnode.cost = 0.0;
@@ -118,7 +111,7 @@ namespace RRTstar_planner
       // the GOAL_RADIUS
       if (pointCircleCollision(p_new.first, p_new.second, goal.pose.position.x , goal.pose.position.y, GOAL_RADIUS) && nodes.size() > 5000)
       {
-        std::vector<std::pair<float, float>> path;
+        
         std::pair<float, float> point;
         
         // New goal inside of the goal tolerance
@@ -138,17 +131,21 @@ namespace RRTstar_planner
 
       }
     }
+    std::cout << "Path size: " << path.size() << std::endl;
+
 
     //if the global planner find a path
     if (path.size() > 0)
     {
+      plan.push_back(start);
       ros::Time plan_time = ros::Time::now();
       // convert the points to poses
       for (int i = 0; i < path.size(); i++)
       {
+        std::cout << path[i].first << " " << path[i].second << std::endl;
         geometry_msgs::PoseStamped pose;
-        pose.header.stamp = plan_time;
-        pose.header.frame_id = global_frame;
+        //pose.header.stamp = plan_time;
+        //pose.header.frame_id = global_frame;
         pose.pose.position.x = path[i].first;
         pose.pose.position.y = path[i].second;
         pose.pose.position.z = 0.0;
@@ -166,45 +163,63 @@ namespace RRTstar_planner
     }
   }
 
+  bool RRTstarPlannerROS::pointCircleCollision(float x1, float y1, float x2, float y2, float radius)
+  {
+    float dist = distance(x1, y1, x2, y2);
+    if (dist < radius)
+      return true;
+    else
+      return false;
+  }
+
   float RRTstarPlannerROS::distance(float px1, float py1, float px2, float py2)
   {
     float dist = sqrt((px1 - px2)*(px1 - px2) + (py1 - py2)*(py1 - py2));
     return dist;
   }
 
-  std::pair<float, float> RRTstarPlannerROS::sampleFree(float x_dim, float y_dim)
+  std::pair<float, float> RRTstarPlannerROS::sampleFree()
   {
-    float MAX_RANDOM_NUMBER = 1.0;
+    // generate random x and y coords within map bounds
+    std::pair<float, float> random_point;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    //float map_width = costmap_->getSizeInMetersX();
+    //float map_height = costmap_->getSizeInMetersY();
+    
+    // Using the clearpath Husky World I know that the dimensions are
+    float map_width = 10.0;
+    float map_height = 10.0;
+    std::uniform_real_distribution<> x(-map_width, map_width);
+    std::uniform_real_distribution<> y(-map_height, map_height);
 
-    float x = (distribution(generator) - MAX_RANDOM_NUMBER/2)*x_dim;
-    float y = (distribution(generator) - MAX_RANDOM_NUMBER/2)*y_dim;
-    std::pair<float, float> p_rand;
-    p_rand.first = x;
-    p_rand.second = y;
-    return p_rand; 
+    random_point.first = x(gen);
+    random_point.second = y(gen);
+
+
+    //TODO check collision
+        //TODO check collision
+        //TODO check collision
+        //TODO check collision
+        //TODO check collision
+        //TODO check collision
+
+    return random_point;
   }
 
-  void RRTstarPlannerROS::mapToWorld(double mx, double my, double& wx, double& wy) 
+  void RRTstarPlannerROS::mapToWorld(int mx, int my, float& wx, float& wy) 
   {
-      wx = costmap_->getOriginX() + (mx+convert_offset_) * costmap_->getResolution();
-      wy = costmap_->getOriginY() + (my+convert_offset_) * costmap_->getResolution();
+      wx = costmap_->getOriginX() + mx * costmap_->getResolution();
+      wy = costmap_->getOriginY() + my * costmap_->getResolution();
   }
 
-bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my) {
-    double origin_x = costmap_->getOriginX(), origin_y = costmap_->getOriginY();
-    double resolution = costmap_->getResolution();
+  void RRTstarPlannerROS::worldToMap(float wx, float wy, int& mx, int& my) {
+    float origin_x = costmap_->getOriginX(), origin_y = costmap_->getOriginY();
+    float resolution = costmap_->getResolution();
 
-    if (wx < origin_x || wy < origin_y)
-        return false;
-
-    mx = (wx - origin_x) / resolution - convert_offset_;
-    my = (wy - origin_y) / resolution - convert_offset_;
-
-    if (mx < costmap_->getSizeInCellsX() && my < costmap_->getSizeInCellsY())
-        return true;
-
-    return false;
-}
+    mx = (wx - origin_x) / resolution ;
+    my = (wy - origin_y) / resolution ;
+  }
 
   //check if point collides with the obstacle
   bool RRTstarPlannerROS::collision(float wx, float wy)
@@ -216,18 +231,22 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
       return true;
 
     // grid[row][column] = vector[row*WIDTH + column]
-    if (costmap_[my*this->width + mx] > 0)
-      return true;
+    //if (costmap_[my*width + mx] > 0)
+    //  return true;
 
+    unsigned int cost = static_cast<int>(costmap_ -> getCost(mx, my));
+    if (cost > 0)
+      return true;
+    
     return false;
   }
   
-  Node RRTstarPlannerROS::getNearest(std::vector<Node> nodes, std::vector<float> x_rand)
+  Node RRTstarPlannerROS::getNearest(std::vector<Node> nodes, std::pair<float, float> p_rand)
   {
     Node node = nodes[0];
     for (int i = 1; i < nodes.size(); i++)
     {
-      if (this->distance(nodes[i].x, nodes[i].y, x_rand[0], x_rand[1]) < this->distance(node.x, node.y, x_rand[0], x_rand[1]))
+      if (distance(nodes[i].x, nodes[i].y, p_rand.first, p_rand.second) < distance(node.x, node.y, p_rand.first, p_rand.second))
         node = nodes[i];
     }
   
@@ -236,6 +255,8 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
 
   Node RRTstarPlannerROS::chooseParent(Node nn, Node newnode, std::vector<Node> nodes)
   {
+    
+
     for (int i = 0; i < nodes.size(); i++)
     {
       if (distance(nodes[i].x, nodes[i].y, newnode.x, newnode.y) < RADIUS &&
@@ -256,13 +277,12 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
     Node node;
     for (int i = 0; i < nodes.size(); i++)
     {
-      node = nodes[i]
-      if (node != this->getParent(newnode) &&
-          this->distance(node.x, node.y, newnode.x, newnode.y) < RADIUS &&
-          newnode.cost + this->distance(node.x, node.y, newnode.x, newnode.y) < node.cost)
+      node = nodes[i];
+      if (node != nodes[newnode.parent_id] && distance(node.x, node.y, newnode.x, newnode.y) < RADIUS &&
+          newnode.cost + distance(node.x, node.y, newnode.x, newnode.y) < node.cost)
       {
-        node.parent = newnode.node_id;
-        node.cost = newnode.cost + this->distance(node.x, node.y, newnode.x, newnode.y);
+        node.parent_id = newnode.node_id;
+        node.cost = newnode.cost + distance(node.x, node.y, newnode.x, newnode.y);
       }
     }
     return nodes;
@@ -271,8 +291,8 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
   std::pair<float, float> RRTstarPlannerROS::steer(float x1, float y1, float x2, float y2)
   {
     std::pair<float, float> p_new;
-    float dist = this->distance(x1, y1, x2, y2);
-    if (dist < this->epsilon_max && dist > this->epsilon_min)
+    float dist = distance(x1, y1, x2, y2);
+    if (dist < epsilon_max && dist > epsilon_min)
     {
       p_new.first = x1;
       p_new.second = y1;
@@ -281,35 +301,39 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
     else
     {
       float theta = atan2(y2-y1, x2-x1);
-      p_new.first = x1 + this->epsilon_max*cos(theta);
-      p_new.second = y1 + this->epsilon_max*sin(theta);
+      p_new.first = x1 + epsilon_max*cos(theta);
+      p_new.second = y1 + epsilon_max*sin(theta);
       return p_new;
     }
   }
 
-  bool RRTstarPlannerROS::obstacleFree(Node node_nearest, std::vector<float> x_rand)
+  bool RRTstarPlannerROS::obstacleFree(Node node_nearest, float px, float py)
   {
     int n = 1;
-    float = theta;
-    std::vector<float> x_n = {0.0, 0.0};
-    float dist = this->distance(node_nearest.x, node_nearest.y, x_rand[0], x_rand[1]);
-    if (dist < this->obs_resolution)
+    float theta;
+
+    std::pair<float, float> p_n;
+    p_n.first = 0.0;
+    p_n.second = 0.0;
+
+    float dist = distance(node_nearest.x, node_nearest.y, px, py);
+    if (dist < resolution)
     {
-      if (collision(x_rand))
+      if (collision(px, py))
         return false;
       else
         return true;
     }
     else
     {
-      int value = int(floor(dist/this->obs_resolution));
+      int value = int(floor(dist/resolution));
       float theta;
       for (int i = 0;i < value; i++)
       {
-        theta = atan2(node_nearest.y - x_rand[1], node_nearest.x - x_rand[0]);
-        x_n[0] = node_nearest.x + n*this->obs_resolution*cos(theta);
-        x_n[1] = node_nearest.y + n*this->obs_resolution*sin(theta);
-        if (this->collision(x_n))
+        theta = atan2(node_nearest.y - py, node_nearest.x - px);
+        p_n.first = node_nearest.x + n*resolution*cos(theta);
+        p_n.second = node_nearest.y + n*resolution*sin(theta);
+        if (collision(p_n.first, p_n.second))
           return false;
         
         n++;
@@ -317,4 +341,6 @@ bool RRTstarPlannerROS::worldToMap(double wx, double wy, double& mx, double& my)
       return true;
     }
   }
-} // RRTstar_planner namespace
+
+
+}; // RRTstar_planner namespace

@@ -23,11 +23,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+#add_library(global_planner_lib src/RRTstar_ros.cpp)
 
 add_library(${PROJECT_NAME}
    src/RRTstar_ros.cpp
 )
 
-#add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
