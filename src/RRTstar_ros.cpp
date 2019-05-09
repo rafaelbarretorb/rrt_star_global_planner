@@ -144,8 +144,8 @@ namespace RRTstar_planner
       {
         std::cout << path[i].first << " " << path[i].second << std::endl;
         geometry_msgs::PoseStamped pose;
-        //pose.header.stamp = plan_time;
-        //pose.header.frame_id = global_frame;
+        pose.header.stamp = plan_time;
+        pose.header.frame_id = "map";
         pose.pose.position.x = path[i].first;
         pose.pose.position.y = path[i].second;
         pose.pose.position.z = 0.0;
@@ -180,30 +180,34 @@ namespace RRTstar_planner
 
   std::pair<float, float> RRTstarPlannerROS::sampleFree()
   {
-    // generate random x and y coords within map bounds
     std::pair<float, float> random_point;
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    //float map_width = costmap_->getSizeInMetersX();
-    //float map_height = costmap_->getSizeInMetersY();
-    
-    // Using the clearpath Husky World I know that the dimensions are
-    float map_width = 10.0;
-    float map_height = 10.0;
-    std::uniform_real_distribution<> x(-map_width, map_width);
-    std::uniform_real_distribution<> y(-map_height, map_height);
-
-    random_point.first = x(gen);
-    random_point.second = y(gen);
-
-
-    //TODO check collision
-        //TODO check collision
-        //TODO check collision
-        //TODO check collision
-        //TODO check collision
-        //TODO check collision
-
+    for (int i = 0; i < 10000; i++)
+    {
+      // generate random x and y coords within map bounds
+      
+      std::random_device rd;
+      std::mt19937 gen(rd());
+      //float map_width = costmap_->getSizeInMetersX();
+      //float map_height = costmap_->getSizeInMetersY();
+      
+      // Using the clearpath Husky World I know that the dimensions are
+      float map_width = 10.0;
+      float map_height = 10.0;
+      std::uniform_real_distribution<> x(-map_width, map_width);
+      std::uniform_real_distribution<> y(-map_height, map_height);
+  
+      random_point.first = x(gen);
+      random_point.second = y(gen);
+  
+      if (!collision(random_point.first, random_point.second))
+        return random_point;
+      //TODO check collision
+          //TODO check collision
+          //TODO check collision
+          //TODO check collision
+          //TODO check collision
+          //TODO check collision
+    }
     return random_point;
   }
 
@@ -265,9 +269,9 @@ namespace RRTstar_planner
       {
         nn = nodes[i];
       }
-      newnode.cost = nn.cost + this->distance(nn.x, nn.y, newnode.x, newnode.y);
-      newnode.parent_id = nn.node_id;
     }
+    newnode.cost = nn.cost + distance(nn.x, nn.y, newnode.x, newnode.y);
+    newnode.parent_id = nn.node_id;
   
     return newnode;
   }
@@ -279,7 +283,7 @@ namespace RRTstar_planner
     {
       node = nodes[i];
       if (node != nodes[newnode.parent_id] && distance(node.x, node.y, newnode.x, newnode.y) < RADIUS &&
-          newnode.cost + distance(node.x, node.y, newnode.x, newnode.y) < node.cost)
+          newnode.cost + distance(node.x, node.y, newnode.x, newnode.y) < node.cost && obstacleFree(node, newnode.x, newnode.y))
       {
         node.parent_id = newnode.node_id;
         node.cost = newnode.cost + distance(node.x, node.y, newnode.x, newnode.y);
