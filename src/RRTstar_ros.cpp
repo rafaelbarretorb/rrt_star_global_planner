@@ -109,7 +109,7 @@ namespace RRTstar_planner
       }
       // Check if the distance between the goal and the new node is less than
       // the GOAL_RADIUS
-      if (pointCircleCollision(p_new.first, p_new.second, goal.pose.position.x , goal.pose.position.y, GOAL_RADIUS) && nodes.size() > 5000)
+      if (pointCircleCollision(p_new.first, p_new.second, goal.pose.position.x , goal.pose.position.y, GOAL_RADIUS) && nodes.size() > 10000)
       {
         
         std::pair<float, float> point;
@@ -128,39 +128,40 @@ namespace RRTstar_planner
       
           current_node = nodes[current_node.parent_id];
         }
-
+        std::cout << "Path size: " << path.size() << std::endl;
+    
+        //if the global planner find a path
+        if (path.size() > 0)
+        {
+          plan.push_back(start);
+          ros::Time plan_time = ros::Time::now();
+          // convert the points to poses
+          for (int i = 0; i < path.size(); i++)
+          {
+            std::cout << path[i].first << " " << path[i].second << std::endl;
+            geometry_msgs::PoseStamped pose;
+            pose.header.stamp = plan_time;
+            pose.header.frame_id = "map";
+            pose.pose.position.x = path[i].first;
+            pose.pose.position.y = path[i].second;
+            pose.pose.position.z = 0.0;
+            pose.pose.orientation.x = 0.0;
+            pose.pose.orientation.y = 0.0;
+            pose.pose.orientation.z = 0.0;
+            pose.pose.orientation.w = 1.0;
+            plan.push_back(pose);
+          }
+          return true;
+        }
+        else
+        {
+          ROS_WARN("The planner failed to find a path, choose other goal position");
+          return false;
+        }
       }
     }
-    std::cout << "Path size: " << path.size() << std::endl;
-
-
-    //if the global planner find a path
-    if (path.size() > 0)
-    {
-      plan.push_back(start);
-      ros::Time plan_time = ros::Time::now();
-      // convert the points to poses
-      for (int i = 0; i < path.size(); i++)
-      {
-        std::cout << path[i].first << " " << path[i].second << std::endl;
-        geometry_msgs::PoseStamped pose;
-        pose.header.stamp = plan_time;
-        pose.header.frame_id = "map";
-        pose.pose.position.x = path[i].first;
-        pose.pose.position.y = path[i].second;
-        pose.pose.position.z = 0.0;
-        pose.pose.orientation.x = 0.0;
-        pose.pose.orientation.y = 0.0;
-        pose.pose.orientation.z = 0.0;
-        pose.pose.orientation.w = 1.0;
-        plan.push_back(pose);
-      }
-    }
-    else
-    {
-      ROS_WARN("The planner failed to find a path, choose other goal position");
-      return false;
-    }
+    ROS_WARN("The planner failed to find a path, choose other goal position");
+    return false;
   }
 
   bool RRTstarPlannerROS::pointCircleCollision(float x1, float y1, float x2, float y2, float radius)
