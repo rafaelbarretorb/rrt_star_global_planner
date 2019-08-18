@@ -1,7 +1,7 @@
-This is a Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree STAR) Path Planning Algorithm. I am trying to keep the code simple to help everyone that is learning ROS and the navigation stack. I had several unnecessary difficulties to learn how to write a Global Planner Plugin and I hope that this package helps you to learn faster.
+This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree STAR) Path Planning Algorithm. I am trying to keep the code simple to help everyone that is learning ROS and the navigation stack. I had several unnecessary difficulties to learn how to write a Global Planner Plugin and I hope that this package helps you to learn faster.
 
 
-I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github.
+I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github to develop this package.
 
 I use the Kinetic Distro. If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
 
@@ -21,6 +21,7 @@ $ source devel/setup.bash
 After following all steps of the sessions 1 and 2  of the Tutorial:
 
 **1. Writing the Path Planner Class**
+
 **2. Writing your Plugin**
 
 You have to run the plugin.
