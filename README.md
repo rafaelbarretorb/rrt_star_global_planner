@@ -20,8 +20,8 @@ $ source devel/setup.bash
 ```
 After following all steps of the sessions 1 and 2  of the Tutorial:
 
-1. Writing the Path Planner Class
-2. Writing your Plugin
+**1. Writing the Path Planner Class**
+**2. Writing your Plugin**
 
 You have to run the plugin.
 
@@ -35,7 +35,7 @@ In the launch file responsible for run the move_base node and related configurat
     <param name="base_local_planner" value="$(arg base_local_planner)"/>
     <rosparam file="$(find husky_navigation)/config/planner.yaml" command="load"/> 
 ```
-**4. Testing the planner with RVIZ**
+**4. Testing the planner with GAZEBO Simulator and RVIZ**
 
 In three separate terminals, execute these three launch commands:
 
@@ -44,7 +44,7 @@ roslaunch husky_gazebo husky_playpen.launch
 roslaunch husky_navigation amcl_demo.launch
 roslaunch husky_viz view_robot.launch
 ```
-The amcl_demo.launch file launchs the move_base.launch edited above and the all navigation packages. The view_robot.launch run the RViz with the proper topics configuration. To test the plugin just click on "2D Nav Goal" button (at the top) and choose a goal location. You can now see your robot moving to its goal.
+The amcl_demo.launch file launchs the move_base.launch edited above and the all navigation packages. The view_robot.launch run the RViz with the proper topics configuration. 
 
-
-
+Lastly, on the left side at "Display" part, change the name of the topic related to Global Planner to visualize it. To test the plugin just click on "2D Nav Goal" button (at the top) and choose a goal location. You can now see your robot moving to its goal
+if everything is fine.
