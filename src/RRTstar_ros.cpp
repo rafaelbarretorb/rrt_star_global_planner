@@ -111,7 +111,7 @@ namespace RRTstar_planner
       // the GOAL_RADIUS
       if (pointCircleCollision(p_new.first, p_new.second, goal.pose.position.x , goal.pose.position.y, GOAL_RADIUS) && nodes.size() > 10000)
       {
-        
+        ROS_INFO("RRT* Global Planner: Path found!!!!");
         std::pair<float, float> point;
         
         // New goal inside of the goal tolerance
@@ -128,7 +128,7 @@ namespace RRTstar_planner
       
           current_node = nodes[current_node.parent_id];
         }
-        std::cout << "Path size: " << path.size() << std::endl;
+        //std::cout << "Path size: " << path.size() << std::endl;
     
         //if the global planner find a path
         if (path.size() > 0)
@@ -138,7 +138,7 @@ namespace RRTstar_planner
           // convert the points to poses
           for (int i = 0; i < path.size(); i++)
           {
-            std::cout << path[i].first << " " << path[i].second << std::endl;
+            //std::cout << path[i].first << " " << path[i].second << std::endl;
             geometry_msgs::PoseStamped pose;
             pose.header.stamp = plan_time;
             pose.header.frame_id = "map";

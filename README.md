@@ -47,5 +47,7 @@ roslaunch husky_viz view_robot.launch
 ```
 The amcl_demo.launch file launchs the move_base.launch edited above and the all navigation packages. The view_robot.launch run the RViz with the proper topics configuration. 
 
-Lastly, on the left side at "Display" part, change the name of the topic related to Global Planner to visualize it. To test the plugin just click on "2D Nav Goal" button (at the top) and choose a goal location. You can now see your robot moving to its goal
+Lastly, on the left side at "Display" part, change the name of the topic related to Global Planner to visualize it. If you using the DWA Local Planner the topic name is "/move_base/DWAPlannerROS/global_plan".
+
+To test the plugin just click on "2D Nav Goal" button (at the top) and choose a goal location. You can now see your robot moving to its goal
 if everything is fine.
