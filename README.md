@@ -28,11 +28,11 @@ You have to run the plugin.
 
 **3. Running the Plugin on the Husky Robot using Gazebo Simulator**
 
-In the launch file responsible for run the move_base node and related configuration files, to load this plugin after all steps of the Tutorial you have to insert the value of the parameter "base_global_planner" to "RRTstar_planner/RRTstarPlannerROS". In the case of the Husky packages, this launch file is "move_base.launch" and is located at my catkin workspace called catkin_ws at "~/catkin_ws/src/husky/husky_navigation/launch/move_base.launch" inside of the package husky_navigation.
+In the launch file responsible for run the move_base node and related configuration files, to load this plugin after all steps of the Tutorial you have to insert the value of the parameter "base_global_planner" to "RRTstar_planner/RRTStarPlanner". In the case of the Husky packages, this launch file is "move_base.launch" and is located at my catkin workspace called catkin_ws at "~/catkin_ws/src/husky/husky_navigation/launch/move_base.launch" inside of the package husky_navigation.
 
 ```
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <param name="base_global_planner" value="RRTstar_planner/RRTstarPlannerROS"/>
+    <param name="base_global_planner" value="RRTstar_planner/RRTStarPlanner"/>
     <param name="base_local_planner" value="$(arg base_local_planner)"/>
     <rosparam file="$(find husky_navigation)/config/planner.yaml" command="load"/> 
 ```
