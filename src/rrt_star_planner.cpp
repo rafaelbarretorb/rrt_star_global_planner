@@ -12,7 +12,7 @@ std::random_device rd;
 static std::default_random_engine generator ( rd() );
 
 //register this planner as a BaseGlobalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(RRTstar_planner::RRTStarPlanner, nav_core::BaseGlobalPlanner)
+PLUGINLIB_EXPORT_CLASS(rrt_star_global_planner::RRTStarPlanner, nav_core::BaseGlobalPlanner)
 
 namespace rrt_star_global_planner {
 
