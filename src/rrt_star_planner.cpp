@@ -3,9 +3,9 @@
 
 */
 
-#include <rrt_star_global_planner/RRTstar_ros.h>
+#include "rrt_star_global_planner/rrt_star_planner.hpp"
 #include <pluginlib/class_list_macros.h>
-#include <iostream>
+
 
 std::random_device rd;
 static std::default_random_engine generator ( rd() );
@@ -16,7 +16,7 @@ PLUGINLIB_EXPORT_CLASS(RRTstar_planner::RRTstarPlannerROS, nav_core::BaseGlobalP
 namespace RRTstar_planner {
 
 RRTstarPlannerROS::RRTstarPlannerROS() 
-        : costmap_(nullptr), initialized_(false) { }
+        : costmap_(NULL), initialized_(false) {}
 
 RRTstarPlannerROS::RRTstarPlannerROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros) 
       : costmap_ros_(costmap_ros)
@@ -158,8 +158,7 @@ void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
     return false;
   }
 
-  bool RRTstarPlannerROS::pointCircleCollision(float x1, float y1, float x2, float y2, float radius)
-  {
+  bool RRTstarPlannerROS::pointCircleCollision(float x1, float y1, float x2, float y2, float radius) {
     float dist = distance(x1, y1, x2, y2);
     if (dist < radius)
       return true;
@@ -241,12 +240,8 @@ void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
     return node;
   }
 
-  Node RRTstarPlannerROS::chooseParent(Node nn, Node newnode, std::vector<Node> nodes)
-  {
-    
-
-    for (int i = 0; i < nodes.size(); i++)
-    {
+  Node RRTstarPlannerROS::chooseParent(Node nn, Node newnode, std::vector<Node> nodes) {
+    for (int i = 0; i < nodes.size(); i++) {
       if (distance(nodes[i].x, nodes[i].y, newnode.x, newnode.y) < RADIUS &&
          nodes[i].cost + distance(nodes[i].x, nodes[i].y, newnode.x, newnode.y) < nn.cost + distance(nn.x, nn.y, newnode.x, newnode.y) &&
          obstacleFree(nodes[i], nn.x, nn.y))
@@ -260,8 +255,7 @@ void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
     return newnode;
   }
 
-  std::vector<Node> RRTstarPlannerROS::rewire(std::vector<Node> nodes, Node newnode)
-  {
+  std::vector<Node> RRTstarPlannerROS::rewire(std::vector<Node> nodes, Node newnode) {
     Node node;
     for (int i = 0; i < nodes.size(); i++)
     {
