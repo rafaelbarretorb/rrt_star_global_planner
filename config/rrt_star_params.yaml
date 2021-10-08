@@ -1,0 +1,7 @@
+
+rrt_star_planner:
+  goal_tolerance: 0.5
+  radius: 1.0
+  epsilon_min: 0.05
+  epsilon_max: 0.1
+  man_num_nodes: 5000
