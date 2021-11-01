@@ -4,6 +4,8 @@
 #include <random>
 #include <cfloat> // DBL_MAX
 
+namespace rrt_star_global_planner {
+
 class RandomDoubleGenerator {
  private:
   std::random_device rd_;
@@ -26,5 +28,5 @@ class RandomDoubleGenerator {
     return std::uniform_real_distribution{-min_value_, std::nextafter(max_value_, DBL_MAX)}(gen);
   }
 };
-
+}  // namespacerrt_star_global_planner
 #endif  // RANDOM_DOUBLE_GENERATOR_HPP_
