@@ -1,18 +1,19 @@
-This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree STAR) Path Planning Algorithm. I am trying to keep the code simple to help everyone that is learning ROS and the navigation stack. I had several unnecessary difficulties to learn how to write a Global Planner Plugin and I hope that this package helps you to learn faster.
+This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) Path Planning Algorithm. I tried to keep the code simple to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
 
+For better performance, fork this repository and improve your own global planner plugin implementing newer variations of the RRT* algorithm as, for example, the RRT*-Smart or Dual-Tree RRT*-Smart. I implemented these algorithms in this repository [Path-Planning-Pygame](https://github.com/rafaelbarretorb/Path-Planning-Pygame) using Python and they reach low-cost paths much faster.
 
 I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github to develop this package.
 
-I use the Kinetic Distro. If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
+I tested in Kinetic and Melodic Distros. If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
 
 ```
 $ cd ~/catkin_ws/src   
-$ git clone https://github.com/husky/husky.git
+$ git clone --branch <distro-name> https://github.com/husky/husky.git
 $ cd ..
 $ catkin_make
-$ sudo apt-get install ros-kinetic-gazebo-ros-pkgs ros-kinetic-gazebo-ros-control
-$ sudo apt-get install ros-kinetic-multimaster-launch
-$ sudo apt-get install ros-kinetic-lms1xx
+$ sudo apt-get install ros-<distro-name>-gazebo-ros-pkgs ros-<distro-name>-gazebo-ros-control
+$ sudo apt-get install ros-<distro-name>-multimaster-launch
+$ sudo apt-get install ros-<distro-name>-lms1xx
 $ rosdep install --from-path src --ignore-src  
 $ catkin_make 
 $ source devel/setup.bash

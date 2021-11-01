@@ -7,10 +7,8 @@
 #ifndef RRT_STAR_PLANNER_HPP_
 #define RRT_STAR_PLANNER_HPP_
 
-/** include ROS libraries **/
-#include <ros/ros.h>
 
-#include <move_base_msgs/MoveBaseAction.h>
+
 
 /** for global path planner interface **/
 #include <costmap_2d/costmap_2d_ros.h>
@@ -30,21 +28,20 @@
 #include <random>
 
 
-float euclideanDistance2D(double x1, double y1, double x2, double y2) {
+float euclideanDistance2D(float x1, float y1, float x2, float y2) {
   return std::hypot((x1 - x2), (y1 - y2));
 }
 
-/**
- * @brief Node struct
- * 
-*/
+ 
+
+namespace rrt_star_global_planner {
+
 struct Node {
-	const float x;
-  const float y;
+	float x;
+  float y;
   int node_id;
 	int parent_id;
   float cost;
-  
   bool operator ==(const Node& node) 
   {
 	  return (x == node.x) && (y == node.y) && (node_id == node.node_id) && (parent_id == node.parent_id) && (cost == node.cost) ;
@@ -57,10 +54,7 @@ struct Node {
     else
       return false;
   }
-}; 
-
-
-namespace rrt_star_global_planner {
+};
 
 class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
  public:
@@ -79,7 +73,7 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   bool collision(float wx, float wy);
 
-  Node getNearest(std::vector<Node> nodes, std::pair<float, float> p_rand);
+  Node getNearest(std::pair<float, float> p_rand);
 
   Node chooseParent(Node nn, Node newnode);
 
@@ -88,50 +82,35 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
   bool obstacleFree(Node node_nearest, float px, float py);
-
-  bool isGoalReached(const Node &new_node);
-
-  float XDIM;
-  float YDIM;
-  float goal_tolerance_;
-  float epsilon_;
- 
- protected:
-
-    /**
-    * @brief Store a copy of the current costmap in \a costmap.  Called by makePlan.
-    */
-    costmap_2d::Costmap2D* costmap_;
-    costmap_2d::Costmap2DROS* costmap_ros_;
-    std::string frame_id_;
-    ros::Publisher plan_pub_;
-    
-    // TODO
-    //allow_unknown_;
-
+  
  private:
-  /** 
-   * @brief Convert from Map (matrix type) coordinates (mx = column and my = row) to World
-   */
-  void mapToWorld(int mx, int my, float& wx, float& wy);
-
-  /** 
-   * @brief Convert from Map (matrix type) coordinates (mx = column and my = row) to World
-   */
   void worldToMap(float wx, float wy, int& mx, int& my);
 
-  float originX;
-  float originY;
-  float resolution;
-  //double step_size_, min_dist_from_robot_;
-  //base_local_planner::WorldModel* world_model_;
+  bool isGoalReached(const std::pair<float, float> &p_new);
+
+  costmap_2d::Costmap2D* costmap_;
+  costmap_2d::Costmap2DROS* costmap_ros_;
+  std::string frame_id_;
+  ros::Publisher plan_pub_;
+
+  float origin_x_;
+  float origin_y_;
+  float resolution_;
+
   bool initialized_{false};
-  int width;
-  int height;
+  int width_;
+  int height_;
   int max_number_nodes_;
+  int min_number_nodes_;
+  float epsilon_;
+  float map_width_;
+  float map_height_;
+  float radius_;
 
   std::vector<Node> nodes_;
+  Node goal_node_;
+  float goal_tolerance_;
 
 };
-}; // RRTstar_planner namespace
-#endif
+} // rrt_star_global_planner namespace
+#endif  // RRT_STAR_PLANNER_HPP_
