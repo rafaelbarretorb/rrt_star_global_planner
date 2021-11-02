@@ -227,11 +227,8 @@ void RRTStarPlanner::chooseParent(Node &parent_node, Node &new_node) {
   float cost_new_node;
   float cost_other_parent;
   float nodes_dist;
-  Node node;
 
-  // TODO use iterator
-  for (int i = 0; i < nodes_.size(); ++i) {
-    node = nodes_[i];
+  for(const auto &node : nodes_) {
     // distance between node and new_node
     nodes_dist = euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
 
