@@ -8,12 +8,12 @@ I tested in Kinetic and Melodic Distros. If you decided to test this plugin usin
 
 ```
 $ cd ~/catkin_ws/src   
-$ git clone --branch <distro-name> https://github.com/husky/husky.git
+$ git clone --branch melodic https://github.com/husky/husky.git
 $ cd ..
 $ catkin_make
-$ sudo apt-get install ros-<distro-name>-gazebo-ros-pkgs ros-<distro-name>-gazebo-ros-control
-$ sudo apt-get install ros-<distro-name>-multimaster-launch
-$ sudo apt-get install ros-<distro-name>-lms1xx
+$ sudo apt-get install ros-melodic-gazebo-ros-pkgs ros-melodic-gazebo-ros-control
+$ sudo apt-get install ros-melodic-multimaster-launch
+$ sudo apt-get install ros-melodic-lms1xx
 $ rosdep install --from-path src --ignore-src  
 $ catkin_make 
 $ source devel/setup.bash

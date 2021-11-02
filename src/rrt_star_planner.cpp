@@ -10,18 +10,12 @@
 
 #include "rrt_star_global_planner/rrt_star_planner.hpp"
 
+
 // TODO set size of vector nodes_(max_num_nodes_)
 
 
 //register this planner as a BaseGlobalPlanner plugin
 PLUGINLIB_EXPORT_CLASS(rrt_star_global_planner::RRTStarPlanner, nav_core::BaseGlobalPlanner)
-
-
-
-
-// std::random_device rd;
-// static std::default_random_engine generator ( rd() );
-
 
 namespace rrt_star_global_planner {
 
@@ -60,6 +54,9 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* cost
     radius_ = 1.0;
     min_number_nodes_ = 1000;
     max_number_nodes_ = 10000;
+
+    // Random
+    random_double_.setRange(-map_width_, map_width_);
 
     ROS_INFO("RRT* planner initialized successfully");
     initialized_ = true;
@@ -163,40 +160,33 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   return false;
 }
 
-
 std::pair<float, float> RRTStarPlanner::sampleFree() {
   std::pair<float, float> random_point;
   for (int i = 0; i < 10000; i++) {
     // generate random x and y coords within map bounds
-    
-    std::random_device rd;
-    std::mt19937 gen(rd());
 
-  
-    std::uniform_real_distribution<> x(-map_width_, map_width_);
-    std::uniform_real_distribution<> y(-map_height_, map_height_);
-
-    random_point.first = x(gen);
-    random_point.second = y(gen);
+    random_point.first = random_double_.generate();
+    random_point.second = random_double_.generate();
 
     if (!collision(random_point.first, random_point.second))
       return random_point;
   }
+  // TODO
+  // ROS_ERROR() not point found
+
   return random_point;
 }
 
 bool RRTStarPlanner::collision(float wx, float wy) {
+  // TODO check this method
   int mx, my;
   worldToMap(wx, wy, mx, my);
 
   if ((mx < 0) || (my < 0) || (mx >= costmap_->getSizeInCellsX()) || (my >= costmap_->getSizeInCellsY()))
     return true;
 
-  // grid[row][column] = vector[row*WIDTH + column]
-  //if (costmap_[my*width + mx] > 0)
-  //  return true;
-
-  unsigned int cost = static_cast<int>(costmap_ -> getCost(mx, my));
+  // TODO static_cast? check this 
+  unsigned int cost = static_cast<int>(costmap_->getCost(mx, my));
   if (cost > 0)
     return true;
   
@@ -204,21 +194,24 @@ bool RRTStarPlanner::collision(float wx, float wy) {
 }
 
 Node RRTStarPlanner::getNearest(std::pair<float, float> p_rand) {
-  Node node = nodes_[0];
-  for (int i = 1; i < nodes_.size(); i++) {
-    if (euclideanDistance2D(nodes_[i].x, nodes_[i].y, p_rand.first, p_rand.second) < euclideanDistance2D(node.x, node.y, p_rand.first, p_rand.second))
-      node = nodes_[i];
+  Node node_near = nodes_[0];
+
+  float dist_nearest, dist;
+  for (int i = 1; i < nodes_.size(); ++i) {
+    dist_nearest = euclideanDistance2D(node_near.x, node_near.y, p_rand.first, p_rand.second);
+    dist = euclideanDistance2D(nodes_[i].x, nodes_[i].y, p_rand.first, p_rand.second);
+    if (dist < dist_nearest)
+      node_near = nodes_[i];
   }
 
-  return node;
+  return node_near;
 }
 
 Node RRTStarPlanner::chooseParent(Node nn, Node newnode) {
   for (int i = 0; i < nodes_.size(); i++) {
     if (euclideanDistance2D(nodes_[i].x, nodes_[i].y, newnode.x, newnode.y) < radius_ &&
         nodes_[i].cost + euclideanDistance2D(nodes_[i].x, nodes_[i].y, newnode.x, newnode.y) < nn.cost + euclideanDistance2D(nn.x, nn.y, newnode.x, newnode.y) &&
-        obstacleFree(nodes_[i], nn.x, nn.y))
-    {
+        obstacleFree(nodes_[i], nn.x, nn.y)) {
       nn = nodes_[i];
     }
   }

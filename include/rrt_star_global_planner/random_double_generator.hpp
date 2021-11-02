@@ -2,7 +2,7 @@
 #define RANDOM_DOUBLE_GENERATOR_HPP_
 
 #include <random>
-#include <cfloat> // DBL_MAX
+#include <cfloat>  // DBL_MAX
 
 namespace rrt_star_global_planner {
 

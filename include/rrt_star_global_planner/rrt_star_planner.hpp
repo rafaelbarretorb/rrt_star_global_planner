@@ -21,40 +21,18 @@
 
 /** include standard libraries **/
 #include <cmath>
-#include <set>
 #include <string>
 #include <vector>
-#include <utility>
-#include <random>
+#include <utility>  // std::pair
 
+#include "rrt_star_global_planner/random_double_generator.hpp"
+#include "rrt_star_global_planner/node.hpp"
 
 float euclideanDistance2D(float x1, float y1, float x2, float y2) {
   return std::hypot((x1 - x2), (y1 - y2));
 }
 
- 
-
 namespace rrt_star_global_planner {
-
-struct Node {
-	float x;
-  float y;
-  int node_id;
-	int parent_id;
-  float cost;
-  bool operator ==(const Node& node) 
-  {
-	  return (x == node.x) && (y == node.y) && (node_id == node.node_id) && (parent_id == node.parent_id) && (cost == node.cost) ;
-  }
-
-  bool operator !=(const Node& node) 
-  {
-    if((x != node.x) || (y != node.y) || (node_id != node.node_id) || (parent_id != node.parent_id) || (cost != node.cost))
-      return true;
-    else
-      return false;
-  }
-};
 
 class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
  public:
@@ -110,6 +88,7 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   std::vector<Node> nodes_;
   Node goal_node_;
   float goal_tolerance_;
+  RandomDoubleGenerator random_double_;
 
 };
 } // rrt_star_global_planner namespace
