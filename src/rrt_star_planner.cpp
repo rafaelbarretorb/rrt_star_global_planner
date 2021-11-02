@@ -253,18 +253,26 @@ void RRTStarPlanner::chooseParent(Node &parent_node, Node &new_node) {
 }
 
 
-// TODO clean the if statement
-void RRTStarPlanner::rewire(Node new_node) {
-  Node node;
-  for (int i = 0; i < nodes_.size(); i++) {
-    node = nodes_[i];
-    if (node != nodes_[new_node.parent_id] &&
-        euclideanDistance2D(node.x, node.y, new_node.x, new_node.y) < radius_ &&
-        new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y) < node.cost &&
-        obstacleFree(node, new_node.x, new_node.y)) {
-      node.parent_id = new_node.node_id;
-      node.cost = new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
+void RRTStarPlanner::rewire(const Node &new_node) {
+  float nodes_dist;
+  float cost_node;
+
+  for(auto &node : nodes_) {
+    // distance between node and new_node
+    nodes_dist = euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
+
+    // check if node is already the parent and if node is near for optimization
+    if(node != nodes_[new_node.parent_id] && nodes_dist < radius_) {
+      // cost if the parent of node is new_node
+      cost_node = new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
+
+      if(cost_node < node.cost && obstacleFree(node, new_node.x, new_node.y)) {
+        // update the new parent of node and its new cost
+        node.parent_id = new_node.node_id;
+        node.cost = cost_node;
+      }
     }
+
   }
 }
 

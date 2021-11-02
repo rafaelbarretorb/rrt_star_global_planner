@@ -57,7 +57,7 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   void chooseParent(Node &parent_node, Node &new_node);
 
-  void rewire(Node new_node);
+  void rewire(const Node &new_node);
 
   // TODO change parameters name
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
