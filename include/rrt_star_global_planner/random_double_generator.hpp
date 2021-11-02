@@ -25,7 +25,7 @@ class RandomDoubleGenerator {
 
     // Note: uniform_real_distribution does [start, stop), but we want to do [start, stop].
     // Therefore passing the next largest value instead.
-    return std::uniform_real_distribution{-min_value_, std::nextafter(max_value_, DBL_MAX)}(gen);
+    return std::uniform_real_distribution{min_value_, std::nextafter(max_value_, DBL_MAX)}(gen);
   }
 };
 }  // namespacerrt_star_global_planner
