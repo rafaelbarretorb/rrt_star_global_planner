@@ -55,7 +55,6 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   Node getNearest(const std::pair<float, float> &p_rand);
 
-  // TODO change parameters name
   void chooseParent(Node &parent_node, Node &new_node);
 
   void rewire(Node new_node);

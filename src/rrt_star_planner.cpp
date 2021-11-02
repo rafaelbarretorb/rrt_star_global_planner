@@ -240,7 +240,7 @@ void RRTStarPlanner::chooseParent(Node &parent_node, Node &new_node) {
       cost_other_parent = node.cost + nodes_dist;
 
       if (cost_other_parent < cost_new_node) {
-        if (obstacleFree(node, parent_node.x, parent_node.y)) {
+        if (obstacleFree(node, new_node.x, new_node.y)) {
           parent_node = node;
         }
       }
