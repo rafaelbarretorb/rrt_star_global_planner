@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
   nav_core
   base_local_planner
   geometry_msgs
-  angles
 )
 
 catkin_package(
@@ -23,7 +22,6 @@ catkin_package(
     nav_core
     base_local_planner
     geometry_msgs
-    angles
 )
 
 include_directories(
