@@ -8,19 +8,18 @@ struct Node {
   float y;
   int node_id;
 	int parent_id;
-  float cost;
-  bool operator ==(const Node& node) 
-  {
-	  return (x == node.x) && (y == node.y) && (node_id == node.node_id) && (parent_id == node.parent_id) && (cost == node.cost) ;
-  }
+  float cost{0.0};
 
-  bool operator !=(const Node& node) 
-  {
-    if((x != node.x) || (y != node.y) || (node_id != node.node_id) || (parent_id != node.parent_id) || (cost != node.cost))
-      return true;
-    else
-      return false;
-  }
+  Node() {}
+
+  Node(float px, float py, int node_index, int parent_index) : x(px),
+                                                       y(py),
+                                                       node_id(node_index),
+                                                       parent_id(parent_index) {}
+   
+  bool operator ==(const Node& node) { return node_id == node.node_id; }
+
+  bool operator !=(const Node& node) { return !(node_id == node.node_id); }
 };
 
 }  // namespace rrt_star_global_planner

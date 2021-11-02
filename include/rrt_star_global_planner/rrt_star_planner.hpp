@@ -23,6 +23,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <list>
 #include <utility>  // std::pair
 
 #include "rrt_star_global_planner/random_double_generator.hpp"
@@ -55,14 +56,15 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   Node getNearest(const std::pair<float, float> &p_rand);
 
   // TODO change parameters name
-  void chooseParent(Node &nn, Node &new_node);
+  void chooseParent(Node &parent_node, Node &new_node);
 
-  void rewire(Node newnode);
+  void rewire(Node new_node);
 
   // TODO change parameters name
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
-  bool obstacleFree(Node node_nearest, float px, float py);
+  bool obstacleFree(const Node &node_nearest, float px, float py);
+
   void worldToMap(float wx, float wy, int& mx, int& my);
 
   bool isGoalReached(const std::pair<float, float> &p_new);

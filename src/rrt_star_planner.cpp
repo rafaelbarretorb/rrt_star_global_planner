@@ -116,18 +116,15 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
       node_nearest = getNearest(p_rand); // The nearest node of the random point
       p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
       if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
-        Node new_node;
-        new_node.x = p_new.first;
-        new_node.y = p_new.second;
-        new_node.node_id = nodes_.size(); // index of the last element after the push_back below
-        new_node.parent_id = node_nearest.node_id;
-        new_node.cost = 0.0;
+        found_next = true;
+
+        // TODO new method encapsulare Node creation?
+        Node new_node(p_new.first, p_new.second, (int)nodes_.size(), node_nearest.node_id);
 
         // Optimize
         chooseParent(node_nearest, new_node); // Select the best parent
         nodes_.push_back(new_node);
         rewire(new_node); 
-        found_next = true;
       }
     }
     // Check if the distance between the goal and the new node is less than
@@ -169,7 +166,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
           pose.pose.orientation.x = 0.0;
           pose.pose.orientation.y = 0.0;
           pose.pose.orientation.z = 0.0;
-          pose.pose.orientation.w = 1.0;  //
+          pose.pose.orientation.w = 1.0;
           plan.push_back(pose);
         }
         return true;
@@ -226,33 +223,55 @@ Node RRTStarPlanner::getNearest(const std::pair<float, float> &p_rand) {
   return node_nearest;
 }
 
-void RRTStarPlanner::chooseParent(Node &nn, Node &new_node) {
+void RRTStarPlanner::chooseParent(Node &parent_node, Node &new_node) {
+  float cost_new_node;
+  float cost_other_parent;
+  float nodes_dist;
+  Node node;
+
+  // TODO use iterator
   for (int i = 0; i < nodes_.size(); ++i) {
-    if (euclideanDistance2D(nodes_[i].x, nodes_[i].y, new_node.x, new_node.y) < radius_ &&
-        nodes_[i].cost + euclideanDistance2D(nodes_[i].x, nodes_[i].y, new_node.x, new_node.y) < nn.cost + euclideanDistance2D(nn.x, nn.y, new_node.x, new_node.y) &&
-        obstacleFree(nodes_[i], nn.x, nn.y)) {
-      nn = nodes_[i];
+    node = nodes_[i];
+    // distance between node and new_node
+    nodes_dist = euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
+
+    if (nodes_dist < radius_) {
+      // current cost of new_node
+      cost_new_node = parent_node.cost + euclideanDistance2D(parent_node.x, parent_node.y, new_node.x, new_node.y);
+      
+      // cost if the parent is node
+      cost_other_parent = node.cost + nodes_dist;
+
+      if (cost_other_parent < cost_new_node) {
+        if (obstacleFree(node, parent_node.x, parent_node.y)) {
+          parent_node = node;
+        }
+      }
     }
   }
-  new_node.cost = nn.cost + euclideanDistance2D(nn.x, nn.y, new_node.x, new_node.y);
-  new_node.parent_id = nn.node_id;
+
+  // Update new_node cost and its new parent
+  new_node.cost = parent_node.cost + euclideanDistance2D(parent_node.x, parent_node.y, new_node.x, new_node.y);
+  new_node.parent_id = parent_node.node_id;
 }
 
 
 // TODO clean the if statement
-void RRTStarPlanner::rewire(Node newnode) {
+void RRTStarPlanner::rewire(Node new_node) {
   Node node;
   for (int i = 0; i < nodes_.size(); i++) {
     node = nodes_[i];
-    if (node != nodes_[newnode.parent_id] && euclideanDistance2D(node.x, node.y, newnode.x, newnode.y) < radius_ &&
-        newnode.cost + euclideanDistance2D(node.x, node.y, newnode.x, newnode.y) < node.cost && obstacleFree(node, newnode.x, newnode.y)) {
-      node.parent_id = newnode.node_id;
-      node.cost = newnode.cost + euclideanDistance2D(node.x, node.y, newnode.x, newnode.y);
+    if (node != nodes_[new_node.parent_id] &&
+        euclideanDistance2D(node.x, node.y, new_node.x, new_node.y) < radius_ &&
+        new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y) < node.cost &&
+        obstacleFree(node, new_node.x, new_node.y)) {
+      node.parent_id = new_node.node_id;
+      node.cost = new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
     }
   }
 }
 
-// TODO change parameters
+// TODO change parameters name
 std::pair<float, float> RRTStarPlanner::steer(float x1, float y1, float x2, float y2) {
   std::pair<float, float> p_new;
   float dist = euclideanDistance2D(x1, y1, x2, y2);
@@ -268,7 +287,7 @@ std::pair<float, float> RRTStarPlanner::steer(float x1, float y1, float x2, floa
   }
 }
 
-bool RRTStarPlanner::obstacleFree(Node node_nearest, float px, float py) {
+bool RRTStarPlanner::obstacleFree(const Node &node_nearest, float px, float py) {
   int n = 1;
   float theta;
 
@@ -285,7 +304,7 @@ bool RRTStarPlanner::obstacleFree(Node node_nearest, float px, float py) {
   } else {
     int value = int(floor(dist/resolution_));
     float theta;
-    for (int i = 0;i < value; i++) {
+    for (int i = 0; i < value; i++) {
       theta = atan2(node_nearest.y - py, node_nearest.x - px);
       p_n.first = node_nearest.x + n*resolution_*cos(theta);
       p_n.second = node_nearest.y + n*resolution_*sin(theta);
