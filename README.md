@@ -6,14 +6,16 @@ I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://
 
 I tested in Kinetic and Melodic Distros. If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
 
+laser_enabled
+
 ```
 $ cd ~/catkin_ws/src   
-$ git clone --branch melodic https://github.com/husky/husky.git
+$ git clone --branch noetic-devel https://github.com/husky/husky.git
 $ cd ..
 $ catkin_make
-$ sudo apt-get install ros-melodic-gazebo-ros-pkgs ros-melodic-gazebo-ros-control
-$ sudo apt-get install ros-melodic-multimaster-launch
-$ sudo apt-get install ros-melodic-lms1xx
+$ sudo apt-get install ros-noetic-gazebo-ros-pkgs ros-noetic-gazebo-ros-control
+$ sudo apt-get install ros-noetic-multimaster-launch
+$ sudo apt-get install ros-noetic-lms1xx
 $ rosdep install --from-path src --ignore-src  
 $ catkin_make 
 $ source devel/setup.bash

@@ -51,9 +51,10 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   bool collision(float wx, float wy);
 
-  Node getNearest(std::pair<float, float> p_rand);
+  Node getNearest(const std::pair<float, float> &p_rand);
 
-  Node chooseParent(Node nn, Node newnode);
+  // TODO change parameters name
+  void chooseParent(Node &nn, Node &new_node);
 
   void rewire(Node newnode);
 
