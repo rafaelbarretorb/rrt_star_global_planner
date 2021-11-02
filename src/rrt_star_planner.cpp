@@ -41,8 +41,6 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* cost
     // hard coding for while
     origin_x_ = costmap_->getOriginX();
     origin_y_ = costmap_->getOriginY();
-    width_ = costmap_->getSizeInCellsX();  // remove ?
-    height_ = costmap_->getSizeInCellsY();  // remove ?
     resolution_ = costmap_->getResolution();
     goal_tolerance_ = 0.5;
     epsilon_ = 0.1;
@@ -63,8 +61,6 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* cost
 
   ROS_INFO("origin_x_: %.2lf", origin_x_);
   ROS_INFO("origin_y_: %.2lf", origin_y_);
-  ROS_INFO("width_: %d", width_);
-  ROS_INFO("height_: %d", height_);
   ROS_INFO("resolution_: %.2lf", resolution_);
   ROS_INFO("goal_tolerance_: %.2lf", goal_tolerance_);
   ROS_INFO("epsilon_: %.2lf", epsilon_);
@@ -85,6 +81,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   //clear the plan, just in case
   plan.clear();
 
+  // Initialize the goal node
   goal_node_.x = goal.pose.position.x;
   goal_node_.y = goal.pose.position.y;
 
@@ -92,8 +89,9 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   ROS_INFO("Current Position: ( %.2lf, %.2lf)", start.pose.position.x, start.pose.position.y);
   ROS_INFO("GOAL Position: ( %.2lf, %.2lf)", goal.pose.position.x, goal.pose.position.y);
 
-  std::vector<std::pair<float, float>> path;
+  std::list<std::pair<float, float>> path;
 
+  // TODO remove this
   std::string global_frame = frame_id_;
 
   Node start_node;
@@ -103,14 +101,14 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   start_node.parent_id = -1; // None parent node
   start_node.cost = 0.0;
 
+  // Add the start node
   nodes_.push_back(start_node);
-
-  ROS_INFO("TEST 1 SIZE nodes_: %d", (int)nodes_.size());
   
   std::pair<float, float> p_rand;
   std::pair<float, float> p_new;
 
   Node node_nearest;
+
   while (nodes_.size() < max_number_nodes_) {
     bool found_next = false;
     while (found_next == false) {
@@ -136,7 +134,6 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
     // the goal tolerance
     if (isGoalReached(p_new) && nodes_.size() > min_number_nodes_) {
       ROS_INFO("RRT* Global Planner: Path found!!!!");
-      std::pair<float, float> point;
       
       // New goal inside of the goal tolerance
       goal_node_ = nodes_[nodes_.size() - 1];
@@ -144,40 +141,38 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
       Node current_node = goal_node_;
 
       // Final Path
+      std::pair<float, float> point;
       while(current_node.parent_id != -1) {
         point.first = current_node.x;
         point.second = current_node.y;
-        path.insert(path.begin(), point); 
-    
+        path.push_front(point);
+
+        // update the current node
         current_node = nodes_[current_node.parent_id];
       }
-
-      ROS_INFO("TEST 2 PATH SIZE: %d", (int)path.size());
   
       //if the global planner find a path
       if(path.size() > 0) {
+
+        // Add the initial Pose
         plan.push_back(start);
+
         ros::Time plan_time = ros::Time::now();
         // convert the points to poses
-        for(int i = 0; i < path.size(); i++) {
+        for(auto p : path) {
           geometry_msgs::PoseStamped pose;
           pose.header.stamp = plan_time;
           pose.header.frame_id = "map";
-          pose.pose.position.x = path[i].first;
-          pose.pose.position.y = path[i].second;
+          pose.pose.position.x = p.first;
+          pose.pose.position.y = p.second;
           pose.pose.position.z = 0.0;
           pose.pose.orientation.x = 0.0;
           pose.pose.orientation.y = 0.0;
           pose.pose.orientation.z = 0.0;
-          pose.pose.orientation.w = 1.0;
+          pose.pose.orientation.w = 1.0;  //
           plan.push_back(pose);
         }
         return true;
-      }
-      else
-      {
-        ROS_WARN("The planner failed to find a path, choose other goal position");
-        return false;
       }
     }
   }
@@ -243,13 +238,14 @@ void RRTStarPlanner::chooseParent(Node &nn, Node &new_node) {
   new_node.parent_id = nn.node_id;
 }
 
+
+// TODO clean the if statement
 void RRTStarPlanner::rewire(Node newnode) {
   Node node;
   for (int i = 0; i < nodes_.size(); i++) {
     node = nodes_[i];
     if (node != nodes_[newnode.parent_id] && euclideanDistance2D(node.x, node.y, newnode.x, newnode.y) < radius_ &&
-        newnode.cost + euclideanDistance2D(node.x, node.y, newnode.x, newnode.y) < node.cost && obstacleFree(node, newnode.x, newnode.y))
-    {
+        newnode.cost + euclideanDistance2D(node.x, node.y, newnode.x, newnode.y) < node.cost && obstacleFree(node, newnode.x, newnode.y)) {
       node.parent_id = newnode.node_id;
       node.cost = newnode.cost + euclideanDistance2D(node.x, node.y, newnode.x, newnode.y);
     }
