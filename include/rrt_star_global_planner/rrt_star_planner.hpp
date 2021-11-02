@@ -47,6 +47,7 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan);
 
+ private:
   std::pair<float, float> sampleFree();
 
   bool collision(float wx, float wy);
@@ -58,11 +59,10 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   void rewire(Node newnode);
 
+  // TODO change parameters name
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
   bool obstacleFree(Node node_nearest, float px, float py);
-  
- private:
   void worldToMap(float wx, float wy, int& mx, int& my);
 
   bool isGoalReached(const std::pair<float, float> &p_new);
@@ -77,8 +77,6 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   float resolution_;
 
   bool initialized_{false};
-  int width_;
-  int height_;
   int max_number_nodes_;
   int min_number_nodes_;
   float epsilon_;
