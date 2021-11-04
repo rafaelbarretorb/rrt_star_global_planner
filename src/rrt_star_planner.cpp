@@ -80,6 +80,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
                               std::vector<geometry_msgs::PoseStamped>& plan) {
   //clear the plan, just in case
   plan.clear();
+  node_count_ = 0;
 
   // Initialize the goal node
   goal_node_.x = goal.pose.position.x;
@@ -94,15 +95,8 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   // TODO remove this
   std::string global_frame = frame_id_;
 
-  Node start_node;
-  start_node.x = start.pose.position.x;
-  start_node.y = start.pose.position.y;
-  start_node.node_id = 0;
-  start_node.parent_id = -1; // None parent node
-  start_node.cost = 0.0;
-
-  // Add the start node
-  nodes_.push_back(start_node);
+  // Start Node
+  createNewNode(start.pose.position.x, start.pose.position.x, -1);
   
   std::pair<float, float> p_rand;
   std::pair<float, float> p_new;
@@ -117,14 +111,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
       p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
       if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
         found_next = true;
-
-        // TODO new method encapsulare Node creation?
-        Node new_node(p_new.first, p_new.second, (int)nodes_.size(), node_nearest.node_id);
-
-        // Optimize
-        chooseParent(node_nearest, new_node); // Select the best parent
-        nodes_.push_back(new_node);
-        rewire(new_node); 
+        createNewNode(p_new.first, p_new.second, node_nearest.node_id);
       }
     }
     // Check if the distance between the goal and the new node is less than
@@ -223,12 +210,17 @@ Node RRTStarPlanner::getNearest(const std::pair<float, float> &p_rand) {
   return node_nearest;
 }
 
-void RRTStarPlanner::chooseParent(Node &parent_node, Node &new_node) {
+void RRTStarPlanner::chooseParent(int node_nearest_id) {
   float cost_new_node;
   float cost_other_parent;
   float nodes_dist;
 
+  Node parent_node = nodes_[node_nearest_id];
+
+  Node &new_node = nodes_.back();
+
   for(const auto &node : nodes_) {
+    if (node.node_id == new_node.node_id) break;
     // distance between node and new_node
     nodes_dist = euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
 
@@ -252,10 +244,11 @@ void RRTStarPlanner::chooseParent(Node &parent_node, Node &new_node) {
   new_node.parent_id = parent_node.node_id;
 }
 
-
-void RRTStarPlanner::rewire(const Node &new_node) {
+void RRTStarPlanner::rewire() {
   float nodes_dist;
   float cost_node;
+
+  Node new_node = nodes_.back();
 
   for(auto &node : nodes_) {
     // distance between node and new_node
@@ -272,7 +265,6 @@ void RRTStarPlanner::rewire(const Node &new_node) {
         node.cost = cost_node;
       }
     }
-
   }
 }
 
@@ -333,5 +325,20 @@ bool RRTStarPlanner::isGoalReached(const std::pair<float, float> &p_new) {
                               goal_node_.x,
                               goal_node_.y) < goal_tolerance_) ? true : false;
 }
+
+void RRTStarPlanner::createNewNode(float x, float y, int node_nearest_id) {
+  Node new_node(x, y, node_count_, node_nearest_id);
+  nodes_.push_back(new_node);
+
+  if(node_nearest_id != -1) {
+    // Optimize
+    chooseParent(node_nearest_id);  // Select the best parent
+    rewire();  // rewire
+  }
+
+  node_count_++;
+}
+
+
 } // RRTstar_planner namespace
 

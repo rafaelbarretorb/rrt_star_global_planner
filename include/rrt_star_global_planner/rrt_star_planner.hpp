@@ -7,16 +7,13 @@
 #ifndef RRT_STAR_PLANNER_HPP_
 #define RRT_STAR_PLANNER_HPP_
 
-
-
-
 /** for global path planner interface **/
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
 #include <nav_core/base_global_planner.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <base_local_planner/world_model.h>
-#include <base_local_planner/costmap_model.h>
+#include <base_local_planner/world_model.h>  // TODO check this
+#include <base_local_planner/costmap_model.h>  // TODO check this
 
 /** include standard libraries **/
 #include <cmath>
@@ -42,7 +39,6 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
-
   bool makePlan(const geometry_msgs::PoseStamped& start,
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan);
@@ -54,9 +50,9 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   Node getNearest(const std::pair<float, float> &p_rand);
 
-  void chooseParent(Node &parent_node, Node &new_node);
+  void chooseParent(int node_nearest_id);
 
-  void rewire(const Node &new_node);
+  void rewire();
 
   // TODO change parameters name
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
@@ -66,6 +62,8 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   void worldToMap(float wx, float wy, int& mx, int& my);
 
   bool isGoalReached(const std::pair<float, float> &p_new);
+
+  void createNewNode(float x, float y, int node_nearest_id);
 
   costmap_2d::Costmap2D* costmap_;
   costmap_2d::Costmap2DROS* costmap_ros_;
@@ -88,6 +86,7 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   Node goal_node_;
   float goal_tolerance_;
   RandomDoubleGenerator random_double_;
+  int node_count_{0};
 
 };
 } // rrt_star_global_planner namespace
