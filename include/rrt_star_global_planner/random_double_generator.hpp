@@ -1,5 +1,5 @@
-#ifndef RANDOM_DOUBLE_GENERATOR_HPP_
-#define RANDOM_DOUBLE_GENERATOR_HPP_
+#ifndef RRT_STAR_GLOBAL_PLANNER_RANDOM_DOUBLE_GENERATOR_HPP_
+#define RRT_STAR_GLOBAL_PLANNER_RANDOM_DOUBLE_GENERATOR_HPP_
 
 #include <random>
 #include <cfloat>  // DBL_MAX
@@ -31,4 +31,4 @@ class RandomDoubleGenerator {
   }
 };
 }  // namespacerrt_star_global_planner
-#endif  // RANDOM_DOUBLE_GENERATOR_HPP_
+#endif  // RRT_STAR_GLOBAL_PLANNER_RANDOM_DOUBLE_GENERATOR_HPP_

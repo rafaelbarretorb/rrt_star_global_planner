@@ -7,7 +7,6 @@
 #include <ros/ros.h>
 #include <pluginlib/class_list_macros.h>
 
-
 #include "rrt_star_global_planner/rrt_star_planner.hpp"
 
 
@@ -41,7 +40,7 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* cost
     private_nh.param("max_num_nodes", max_num_nodes_, 5000);
     private_nh.param("min_num_nodes", min_num_nodes_, 500);
 
-    // TODO
+    // TODO check this
     //world_model_.reset(new base_local_planner::CostmapModel(*costmap_));
 
     // TODO

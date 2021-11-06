@@ -1,5 +1,5 @@
-#ifndef NODE_HPP_
-#define NODE_HPP_
+#ifndef RRT_STAR_GLOBAL_PLANNER_NODE_HPP_
+#define RRT_STAR_GLOBAL_PLANNER_NODE_HPP_
 
 namespace rrt_star_global_planner {
 
@@ -21,7 +21,6 @@ struct Node {
 
   bool operator !=(const Node& node) { return !(node_id == node.node_id); }
 };
-
 }  // namespace rrt_star_global_planner
 
-#endif  // NODE_HPP_
+#endif  // RRT_STAR_GLOBAL_PLANNER_NODE_HPP_
