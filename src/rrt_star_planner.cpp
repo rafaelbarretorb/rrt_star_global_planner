@@ -60,12 +60,6 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* cost
   } else {
     ROS_WARN("This planner has already been initialized... doing nothing.");
   }
-
-  ROS_INFO("goal_tolerance_: %.2lf", goal_tolerance_);
-  ROS_INFO("epsilon_: %.2lf", epsilon_);
-  ROS_INFO("radius_: %.2lf", radius_);
-  ROS_INFO("max_num_nodes_: %d", max_num_nodes_);
-  ROS_INFO("min_num_nodes_: %d", min_num_nodes_);
 }
 
 bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
