@@ -11,9 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         id: action_ros_ci_step
-        with:
-          # package-name:
-      - uses: actions/upload-artifact@v1
+      - uses: 'ros-industrial/industrial_ci@master'
         if: failure()
         with:
           distro: ${{ matrix.distro }}
