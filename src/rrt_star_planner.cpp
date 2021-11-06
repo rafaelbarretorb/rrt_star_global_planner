@@ -18,13 +18,9 @@ PLUGINLIB_EXPORT_CLASS(rrt_star_global_planner::RRTStarPlanner, nav_core::BaseGl
 
 namespace rrt_star_global_planner {
 
-RRTStarPlanner::RRTStarPlanner() 
-        : costmap_(NULL), initialized_(false) {}
-
 RRTStarPlanner::RRTStarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros) 
       : costmap_ros_(costmap_ros) {
-    //initialize the planner
-    initialize(name, costmap_ros);
+  initialize(name, costmap_ros);
 }
 
 void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros) {

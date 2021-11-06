@@ -33,7 +33,7 @@ namespace rrt_star_global_planner {
 
 class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
  public:
-  RRTStarPlanner();
+  RRTStarPlanner() = default;
 
   RRTStarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
@@ -67,8 +67,8 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   void computeFinalPath(std::vector<geometry_msgs::PoseStamped>& plan);
 
-  costmap_2d::Costmap2D* costmap_;
-  costmap_2d::Costmap2DROS* costmap_ros_;
+  costmap_2d::Costmap2D* costmap_{NULL};
+  costmap_2d::Costmap2DROS* costmap_ros_{NULL};
   std::string frame_id_;
   ros::Publisher plan_pub_;
 
