@@ -1,32 +1,44 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.1.3)
 project(rrt_star_global_planner)
 
-
-add_compile_options(-std=c++11)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(catkin REQUIRED COMPONENTS
-  nav_core
   roscpp
-  rospy
-  std_msgs
+  costmap_2d
+  pluginlib
+  nav_core
+  base_local_planner
+  geometry_msgs
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS nav_core roscpp rospy std_msgs
+  CATKIN_DEPENDS
+    roscpp
+    costmap_2d
+    pluginlib
+    nav_core
+    base_local_planner
+    geometry_msgs
 )
-
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
 
-#add_library(global_planner_lib src/RRTstar_ros.cpp)
-
 add_library(${PROJECT_NAME}
-   src/RRTstar_ros.cpp
+   src/rrt_star_planner.cpp
 )
 
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
+
+install(
+  FILES rrt_star_planner_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
