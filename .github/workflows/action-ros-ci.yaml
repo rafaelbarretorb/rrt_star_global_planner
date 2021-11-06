@@ -1,0 +1,19 @@
+name: build
+on: pull_request
+jobs:
+  build_and_test:
+    name: build_and_test
+    runs-on: [self-hosted, linux, x64, default]
+    strategy:
+      fail-fast: false
+      matrix:
+          distro: [bionic, focal]
+    steps:
+      - uses: actions/checkout@v2
+        id: action_ros_ci_step
+        with:
+          # package-name:
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          distro: ${{ matrix.distro }}
