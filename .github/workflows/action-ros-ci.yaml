@@ -1,17 +1,36 @@
-name: build
+name: CI
+
 on: pull_request
+
 jobs:
-  build_and_test:
-    name: build_and_test
-    runs-on: [self-hosted, linux, x64, default]
+  industrial_ci:
     strategy:
-      fail-fast: false
       matrix:
-          distro: [bionic, focal]
+        env:
+          - {ROS_DISTRO: noetic, ROS_REPO: testing}
+          - {ROS_DISTRO: noetic, ROS_REPO: main}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        id: action_ros_ci_step
+      - uses: actions/checkout@v1
       - uses: 'ros-industrial/industrial_ci@master'
-        if: failure()
-        with:
-          distro: ${{ matrix.distro }}
+        env: ${{matrix.env}}
+
+# name: build
+# on: pull_request
+# jobs:
+#   build_and_test:
+#     name: build_and_test
+#     runs-on: [self-hosted, linux, x64, default]
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         env:
+#           - {ROS_DISTRO: melodic, ROS_REPO: testing}
+#           - {ROS_DISTRO: melodic, ROS_REPO: main}
+#     steps:
+#       - uses: actions/checkout@v2
+#         id: action_ros_ci_step
+#       - uses: 'ros-industrial/industrial_ci@master'
+#         if: failure()
+#         with:
+#           distro: ${{ matrix.distro }}
