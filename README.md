@@ -11,13 +11,11 @@ This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring 
 For better performance, fork this repository and improve your own global planner plugin implementing newer variations of the RRT* algorithm as, for example, the **RRT\*-Smart** or **Dual-Tree RRT\*-Smart**. I implemented these algorithms in this repository [Path-Planning-Pygame](https://github.com/rafaelbarretorb/Path-Planning-Pygame) using Python and they reach low-cost paths much faster.
 
 ## ROS Distros
-___
 
 I tested the plugin in Melodic and Noetic Distros with C++17 (```set(CMAKE_CXX_STANDARD 17)``` at *CMakeLists.txt* file).
 
 
 ## Clearpath Husky Robot Simulator
-___
 
 If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
 
@@ -88,7 +86,6 @@ RRTStarPlanner:
 
 ```
 **4. Testing the planner with Gazebo Simulator and Rviz**
-___
 
 In three separate terminals, execute these three launch commands:
 
