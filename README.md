@@ -1,5 +1,4 @@
-## RRT* Global Planner Plugin
-___
+# `rrt_star_global_planner`
 
 <p float="left">
   <img src="doc/rrt_star_husky_path.gif" width="600" />
@@ -7,18 +6,17 @@ ___
 
 This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) path planning algorithm. I tried to keep the code simple and clean to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
 
-### RRT* Algorithm Performance
-___
+## RRT* Algorithm Performance
 
 For better performance, fork this repository and improve your own global planner plugin implementing newer variations of the RRT* algorithm as, for example, the **RRT\*-Smart** or **Dual-Tree RRT\*-Smart**. I implemented these algorithms in this repository [Path-Planning-Pygame](https://github.com/rafaelbarretorb/Path-Planning-Pygame) using Python and they reach low-cost paths much faster.
 
-### ROS Distros
+## ROS Distros
 ___
 
 I tested the plugin in Melodic and Noetic Distros with C++17 (```set(CMAKE_CXX_STANDARD 17)``` at *CMakeLists.txt* file).
 
 
-### Clearpath Husky Robot Simulator
+## Clearpath Husky Robot Simulator
 ___
 
 If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
@@ -37,8 +35,7 @@ $ source devel/setup.bash
 
 ```
 
-### Enable the Laser Scan Sensor
-___
+## Enable the Laser Scan Sensor
 
 The Navigation Stack needs a perception sensor to work and the husky package does not enable it by default in the main distro branches. So you have to enable at least one sensor manually. The robot description has some available sensors and the simpler one is the laser scan LMS1XX. This sensor is enough to test the path planner. Therefore, **set 1** in the parameter laser_enabled as shown below:
 
@@ -54,8 +51,7 @@ The Navigation Stack needs a perception sensor to work and the husky package doe
 </p>
 
 
-### Tutorial: Writing A Global Path Planner As Plugin in ROS
-___
+## Tutorial: Writing A Global Path Planner As Plugin in ROS
 
 I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github to develop this package. After following all steps of the sessions 1 and 2  of the Tutorial:
 
@@ -109,7 +105,6 @@ To test the plugin just click on "2D Nav Goal" button (at the top) and choose a 
 
 **
 
-### Errors and Issues
-___
+## Errors and Issues
 
 If you find some error or issue, please create a new issue and help me to improve this package.
