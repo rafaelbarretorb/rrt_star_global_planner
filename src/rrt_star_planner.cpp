@@ -19,7 +19,6 @@ PLUGINLIB_EXPORT_CLASS(rrt_star_global_planner::RRTStarPlanner, nav_core::BaseGl
 
 namespace rrt_star_global_planner {
 
-
 RRTStarPlanner::RRTStarPlanner() 
         : costmap_(NULL), initialized_(false) {}
 
@@ -36,43 +35,37 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* cost
     costmap_ = costmap_ros->getCostmap();
 
     ros::NodeHandle private_nh("~/" + name);
+    private_nh.param("goal_tolerance", goal_tolerance_, 0.5);
+    private_nh.param("radius", radius_, 1.0);
+    private_nh.param("epsilon", epsilon_, 0.2);
+    private_nh.param("max_num_nodes", max_num_nodes_, 5000);
+    private_nh.param("min_num_nodes", min_num_nodes_, 500);
+
+    // TODO
+    //world_model_.reset(new base_local_planner::CostmapModel(*costmap_));
 
     // TODO
     // hard coding for while
     origin_x_ = costmap_->getOriginX();
     origin_y_ = costmap_->getOriginY();
     resolution_ = costmap_->getResolution();
-    goal_tolerance_ = 0.5;
-    epsilon_ = 0.1;
     map_width_ = 10.0;
     map_height_ = 10.0;
-    radius_ = 1.0;
-    min_number_nodes_ = 1000;
-    max_number_nodes_ = 10000;
 
     // Random
     random_double_.setRange(-map_width_, map_width_);
 
-    ROS_INFO("RRT* planner initialized successfully");
+    ROS_INFO("RRT* Global Planner initialized successfully.");
     initialized_ = true;
   } else {
-    ROS_WARN("This planner has already been initialized... doing nothing");
+    ROS_WARN("This planner has already been initialized... doing nothing.");
   }
 
-  ROS_INFO("origin_x_: %.2lf", origin_x_);
-  ROS_INFO("origin_y_: %.2lf", origin_y_);
-  ROS_INFO("resolution_: %.2lf", resolution_);
   ROS_INFO("goal_tolerance_: %.2lf", goal_tolerance_);
   ROS_INFO("epsilon_: %.2lf", epsilon_);
-  ROS_INFO("map_width_: %.2lf", map_width_);
-  ROS_INFO("map_height_: %.2lf", map_height_);
   ROS_INFO("radius_: %.2lf", radius_);
-  ROS_INFO("min_number_nodes_: %d", min_number_nodes_);
-  ROS_INFO("max_number_nodes_: %d", max_number_nodes_);
-  ROS_INFO("test random double 1: %.2lf", random_double_.generate());
-  ROS_INFO("test random double 2: %.2lf", random_double_.generate());
-  ROS_INFO("test random double 3: %.2lf", random_double_.generate());
-  
+  ROS_INFO("max_num_nodes_: %d", max_num_nodes_);
+  ROS_INFO("min_num_nodes_: %d", min_num_nodes_);
 }
 
 bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
@@ -90,20 +83,23 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   ROS_INFO("Current Position: ( %.2lf, %.2lf)", start.pose.position.x, start.pose.position.y);
   ROS_INFO("GOAL Position: ( %.2lf, %.2lf)", goal.pose.position.x, goal.pose.position.y);
 
-  std::list<std::pair<float, float>> path;
-
   // TODO remove this
   std::string global_frame = frame_id_;
 
   // Start Node
   createNewNode(start.pose.position.x, start.pose.position.x, -1);
+
+  std::list<std::pair<float, float>> path; // remove
+
+  // Add the initial Pose
+  plan.push_back(start);
   
   std::pair<float, float> p_rand;
   std::pair<float, float> p_new;
 
   Node node_nearest;
 
-  while (nodes_.size() < max_number_nodes_) {
+  while (nodes_.size() < max_num_nodes_) {
     bool found_next = false;
     while (found_next == false) {
       p_rand = sampleFree(); // random point in the free space
@@ -114,52 +110,16 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
         createNewNode(p_new.first, p_new.second, node_nearest.node_id);
       }
     }
-    // Check if the distance between the goal and the new node is less than
-    // the goal tolerance
-    if (isGoalReached(p_new) && nodes_.size() > min_number_nodes_) {
+
+    // Check if the distance between the goal and the new node is less than the goal tolerance
+    if (isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
       ROS_INFO("RRT* Global Planner: Path found!!!!");
-      
-      // New goal inside of the goal tolerance
-      goal_node_ = nodes_[nodes_.size() - 1];
+      computeFinalPath(plan);
 
-      Node current_node = goal_node_;
-
-      // Final Path
-      std::pair<float, float> point;
-      while(current_node.parent_id != -1) {
-        point.first = current_node.x;
-        point.second = current_node.y;
-        path.push_front(point);
-
-        // update the current node
-        current_node = nodes_[current_node.parent_id];
-      }
-  
-      //if the global planner find a path
-      if(path.size() > 0) {
-
-        // Add the initial Pose
-        plan.push_back(start);
-
-        ros::Time plan_time = ros::Time::now();
-        // convert the points to poses
-        for(auto p : path) {
-          geometry_msgs::PoseStamped pose;
-          pose.header.stamp = plan_time;
-          pose.header.frame_id = "map";
-          pose.pose.position.x = p.first;
-          pose.pose.position.y = p.second;
-          pose.pose.position.z = 0.0;
-          pose.pose.orientation.x = 0.0;
-          pose.pose.orientation.y = 0.0;
-          pose.pose.orientation.z = 0.0;
-          pose.pose.orientation.w = 1.0;
-          plan.push_back(pose);
-        }
-        return true;
-      }
+      return true;
     }
   }
+
   ROS_WARN("The planner failed to find a path, choose other goal position");
   return false;
 }
@@ -339,6 +299,41 @@ void RRTStarPlanner::createNewNode(float x, float y, int node_nearest_id) {
   node_count_++;
 }
 
+void RRTStarPlanner::computeFinalPath(std::vector<geometry_msgs::PoseStamped>& plan) {
+  std::list<std::pair<float, float>> path;
 
-} // RRTstar_planner namespace
+  // New goal inside of the goal tolerance
+  goal_node_ = nodes_.back();
+  Node current_node = goal_node_;
 
+  // Final Path
+  std::pair<float, float> point;
+  while(current_node.parent_id != -1) {
+    point.first = current_node.x;
+    point.second = current_node.y;
+    path.push_front(point);
+
+    // update the current node
+    current_node = nodes_[current_node.parent_id];
+  }
+  
+  //if the global planner find a path
+  if(path.size() > 0) {
+    ros::Time plan_time = ros::Time::now();
+    // convert points to poses
+    for(auto p : path) {
+      geometry_msgs::PoseStamped pose;
+      pose.header.stamp = plan_time;
+      pose.header.frame_id = "map";  // TODO remove hard coding
+      pose.pose.position.x = p.first;
+      pose.pose.position.y = p.second;
+      pose.pose.position.z = 0.0;
+      pose.pose.orientation.x = 0.0;
+      pose.pose.orientation.y = 0.0;
+      pose.pose.orientation.z = 0.0;
+      pose.pose.orientation.w = 1.0;
+      plan.push_back(pose);
+    }
+  }
+}
+}  // RRTstar_planner namespace

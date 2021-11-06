@@ -65,6 +65,8 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
 
   void createNewNode(float x, float y, int node_nearest_id);
 
+  void computeFinalPath(std::vector<geometry_msgs::PoseStamped>& plan);
+
   costmap_2d::Costmap2D* costmap_;
   costmap_2d::Costmap2DROS* costmap_ros_;
   std::string frame_id_;
@@ -75,16 +77,16 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   float resolution_;
 
   bool initialized_{false};
-  int max_number_nodes_;
-  int min_number_nodes_;
-  float epsilon_;
+  int max_num_nodes_;
+  int min_num_nodes_;
+  double epsilon_;
   float map_width_;
   float map_height_;
-  float radius_;
+  double radius_;
 
   std::vector<Node> nodes_;
   Node goal_node_;
-  float goal_tolerance_;
+  double goal_tolerance_;
   RandomDoubleGenerator random_double_;
   int node_count_{0};
 

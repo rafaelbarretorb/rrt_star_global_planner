@@ -6,6 +6,8 @@
 
 namespace rrt_star_global_planner {
 
+// TODO allow different ranges of x and y for non square maps
+
 class RandomDoubleGenerator {
  private:
   std::random_device rd_;
