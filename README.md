@@ -1,7 +1,7 @@
 ## RRT* Global Planner Plugin
 
 <p float="left">
-  <img src="doc/rrt_star_husky_path.gif" width="800" />
+  <img src="doc/rrt_star_husky_path.gif" width="600" />
 </p>
 
 This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) path planning algorithm. I tried to keep the code simple and clean to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
@@ -44,8 +44,8 @@ The Navigation Stack needs a perception sensor to work and the husky package doe
 ```
 
 <p float="left">
-  <img src="doc/no_laser_husky.png" width="400" />
-  <img src="doc/laser_husky.png" width="400" /> 
+  <img src="doc/no_laser_husky.png" width="300" />
+  <img src="doc/laser_husky.png" width="300" /> 
 </p>
 ### Tutorial: Writing A Global Path Planner As Plugin in ROS
 
