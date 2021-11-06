@@ -1,45 +1,83 @@
-This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) Path Planning Algorithm. I tried to keep the code simple to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
+## RRT* Global Planner Plugin
 
-For better performance, fork this repository and improve your own global planner plugin implementing newer variations of the RRT* algorithm as, for example, the RRT*-Smart or Dual-Tree RRT*-Smart. I implemented these algorithms in this repository [Path-Planning-Pygame](https://github.com/rafaelbarretorb/Path-Planning-Pygame) using Python and they reach low-cost paths much faster.
+This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) path planning algorithm. I tried to keep the code simple and clean to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
 
-I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github to develop this package.
+### RRT* Algorithm Performance
 
-I tested in Kinetic and Melodic Distros. If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
+For better performance, fork this repository and improve your own global planner plugin implementing newer variations of the RRT* algorithm as, for example, the **RRT\*-Smart** or **Dual-Tree RRT\*-Smart**. I implemented these algorithms in this repository [Path-Planning-Pygame](https://github.com/rafaelbarretorb/Path-Planning-Pygame) using Python and they reach low-cost paths much faster.
 
-laser_enabled
+### ROS Distros
+
+I tested the plugin in Melodic and Noetic Distros with C++17 ```set(CMAKE_CXX_STANDARD 17)```. 
+
+
+
+### Clearpath Husky Robot Simulator
+
+If you decided to test this plugin using Husky Robot Simulator you can install it with the following instructions:
 
 ```
 $ cd ~/catkin_ws/src   
-$ git clone --branch noetic-devel https://github.com/husky/husky.git
+$ git clone --branch <distro-branch-name> https://github.com/husky/husky.git
 $ cd ..
 $ catkin_make
-$ sudo apt-get install ros-noetic-gazebo-ros-pkgs ros-noetic-gazebo-ros-control
-$ sudo apt-get install ros-noetic-multimaster-launch
-$ sudo apt-get install ros-noetic-lms1xx
+$ sudo apt-get install ros-<distro-name>-gazebo-ros-pkgs ros-<distro-name>-gazebo-ros-control
+$ sudo apt-get install ros-<distro-name>-multimaster-launch
+$ sudo apt-get install ros-<distro-name>-lms1xx
 $ rosdep install --from-path src --ignore-src  
 $ catkin_make 
 $ source devel/setup.bash
 
 ```
-After following all steps of the sessions 1 and 2  of the Tutorial:
+
+### Enable the Laser Scan Sensor
+
+The Navigation Stack needs a perception sensor to work and the husky package does not enable it by default in the main distro branches. So you have to enable at least one sensor manually. The robot description has some available sensors and the simpler one is the laser scan LMS1XX. This sensor is enough to test the path planner. Therefore, **set 1** in the parameter laser_enabled as shown below:
+
+```
+<!-- File husky.urdf.xacro -->
+<!-- Location: ~/catkin_ws/src/husky/husky_description/urdf/husky.urdf.xacro -->
+<xacro:arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED 1)" />
+```
+
+TODO picture of the laser scan at gazebo
+### Tutorial: Writing A Global Path Planner As Plugin in ROS
+
+I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github to develop this package. After following all steps of the sessions 1 and 2  of the Tutorial:
 
 **1. Writing the Path Planner Class**
+Same instructions.
 
 **2. Writing your Plugin**
+Same instructions.
 
-You have to run the plugin.
 
 **3. Running the Plugin on the Husky Robot using Gazebo Simulator**
 
-In the launch file responsible for run the move_base node and related configuration files, to load this plugin after all steps of the Tutorial you have to insert the value of the parameter "base_global_planner" to "RRTstar_planner/RRTStarPlanner". In the case of the Husky packages, this launch file is "move_base.launch" and is located at my catkin workspace called catkin_ws at "~/catkin_ws/src/husky/husky_navigation/launch/move_base.launch" inside of the package husky_navigation.
+In the launch file *move_base.launch*, to load this plugin after all steps of the Tutorial you have to insert the default value of the "base_global_planner" to "rrt_star_global_planner/RRTStarPlanner" as shown below (you should comment or remove the default global planner value "navfn/NavfnROS").
 
 ```
-  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <param name="base_global_planner" value="RRTstar_planner/RRTStarPlanner"/>
-    <param name="base_local_planner" value="$(arg base_local_planner)"/>
-    <rosparam file="$(find husky_navigation)/config/planner.yaml" command="load"/> 
+<!-- move_base.launch -->
+<!-- ~/catkin_ws/src/husky/husky_navigation/launch/move_base.launch -->
+<!-- Planners -->
+<!-- <arg name="base_global_planner" default="navfn/NavfnROS"/> -->
+<arg name="base_global_planner" default="rrt_star_global_planner/RRTStarPlanner"/>
 ```
-**4. Testing the planner with GAZEBO Simulator and RVIZ**
+
+In the configuration YAML file of the navigation planners *planner.yaml* you should insert the parameters values of the new planner:
+
+```
+<!-- File planner.yaml -->
+<!-- ~/catkin_ws/src/husky/husky_navigation/config/planner.yaml -->
+RRTStarPlanner:
+  goal_tolerance: 0.2
+  radius: 1.0
+  epsilon: 0.2
+  max_num_nodes: 10000
+  min_num_nodes: 1000
+
+```
+**4. Testing the planner with Gazebo Simulator and Rviz**
 
 In three separate terminals, execute these three launch commands:
 
@@ -48,9 +86,15 @@ roslaunch husky_gazebo husky_playpen.launch
 roslaunch husky_navigation amcl_demo.launch
 roslaunch husky_viz view_robot.launch
 ```
-The amcl_demo.launch file launchs the move_base.launch edited above and the all navigation packages. The view_robot.launch run the RViz with the proper topics configuration. 
+The amcl_demo.launch file launchs the *move_base.launch* file edited above and the all navigation packages. The *view_robot.launch* file run the RViz with the proper topics configuration. 
 
 Lastly, on the left side at "Display" part, change the name of the topic related to Global Planner to visualize it. If you using the DWA Local Planner the topic name is "/move_base/DWAPlannerROS/global_plan".
 
-To test the plugin just click on "2D Nav Goal" button (at the top) and choose a goal location. You can now see your robot moving to its goal
-if everything is fine.
+To test the plugin just click on "2D Nav Goal" button (at the top) and choose a goal location. You can now see that path generated by this planner (in green) and the robot moving to its goal if everything is fine.
+
+**
+
+
+
+### Errors and Issues
+If you find some error or issue in this package, please create a new issue and help me to improve this package.
