@@ -1,5 +1,9 @@
 ## RRT* Global Planner Plugin
 
+<p float="left">
+  <img src="doc/rrt_star_husky_path.gif" width="400" />
+</p>
+
 This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) path planning algorithm. I tried to keep the code simple and clean to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
 
 ### RRT* Algorithm Performance
@@ -8,8 +12,7 @@ For better performance, fork this repository and improve your own global planner
 
 ### ROS Distros
 
-I tested the plugin in Melodic and Noetic Distros with C++17 ```set(CMAKE_CXX_STANDARD 17)```. 
-
+I tested the plugin in Melodic and Noetic Distros with C++17 (```set(CMAKE_CXX_STANDARD 17)``` at *CMakeLists.txt* file).
 
 
 ### Clearpath Husky Robot Simulator
@@ -40,7 +43,10 @@ The Navigation Stack needs a perception sensor to work and the husky package doe
 <xacro:arg name="laser_enabled" default="$(optenv HUSKY_LMS1XX_ENABLED 1)" />
 ```
 
-TODO picture of the laser scan at gazebo
+<p float="left">
+  <img src="doc/no_laser_husky.png" width="200" />
+  <img src="doc/laser_husky.png" width="200" /> 
+</p>
 ### Tutorial: Writing A Global Path Planner As Plugin in ROS
 
 I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github to develop this package. After following all steps of the sessions 1 and 2  of the Tutorial:
@@ -95,6 +101,5 @@ To test the plugin just click on "2D Nav Goal" button (at the top) and choose a 
 **
 
 
-
 ### Errors and Issues
-If you find some error or issue in this package, please create a new issue and help me to improve this package.
+If you find some error or issue, please create a new issue and help me to improve this package.
