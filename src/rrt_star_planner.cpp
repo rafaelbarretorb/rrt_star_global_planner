@@ -4,7 +4,7 @@
 
 */
 
-#include <ros/ros.h>
+
 #include <pluginlib/class_list_macros.h>
 
 #include "rrt_star_global_planner/rrt_star_planner.hpp"
@@ -18,16 +18,30 @@ PLUGINLIB_EXPORT_CLASS(rrt_star_global_planner::RRTStarPlanner, nav_core::BaseGl
 
 namespace rrt_star_global_planner {
 
-RRTStarPlanner::RRTStarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros) 
-      : costmap_ros_(costmap_ros) {
-  initialize(name, costmap_ros);
+RRTStarPlanner::RRTStarPlanner() 
+  : costmap_(NULL), initialized_(false){}
+
+RRTStarPlanner::RRTStarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
+  : costmap_(NULL), initialized_(false) {
+    //initialize the planner
+    initialize(name, costmap_ros);
+}
+
+RRTStarPlanner::RRTStarPlanner(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame)
+  : costmap_(NULL), initialized_(false) {
+    //initialize the planner
+    initialize(name, costmap, global_frame);
 }
 
 void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros) {
+  initialize(name, costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID());
+}
+
+void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame) {
   if (!initialized_) {
     // Initialize map
-    costmap_ros_ = costmap_ros;
-    costmap_ = costmap_ros->getCostmap();
+    costmap_ = costmap;
+    //costmap_ = costmap_ros->getCostmap();
 
     ros::NodeHandle private_nh("~/" + name);
     private_nh.param("goal_tolerance", goal_tolerance_, 0.5);
@@ -88,7 +102,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
 
   Node node_nearest;
 
-  while (nodes_.size() < max_num_nodes_) {
+  while(nodes_.size() < max_num_nodes_) {
     bool found_next = false;
     while (found_next == false) {
       p_rand = sampleFree(); // random point in the free space
@@ -101,7 +115,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
     }
 
     // Check if the distance between the goal and the new node is less than the goal tolerance
-    if (isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
+    if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
       ROS_INFO("RRT* Global Planner: Path found!!!!");
       computeFinalPath(plan);
 
