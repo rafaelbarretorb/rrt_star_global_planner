@@ -25,11 +25,12 @@
 #include "rrt_star_global_planner/random_double_generator.hpp"
 #include "rrt_star_global_planner/node.hpp"
 
+
+namespace rrt_star_global_planner {
+
 float euclideanDistance2D(float x1, float y1, float x2, float y2) {
   return std::hypot((x1 - x2), (y1 - y2));
 }
-
-namespace rrt_star_global_planner {
 
 class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
  public:

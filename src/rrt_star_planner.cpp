@@ -88,7 +88,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
 
   Node node_nearest;
 
-  while (nodes_.size() < max_num_nodes_) {
+  while(nodes_.size() < max_num_nodes_) {
     bool found_next = false;
     while (found_next == false) {
       p_rand = sampleFree(); // random point in the free space
@@ -101,7 +101,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
     }
 
     // Check if the distance between the goal and the new node is less than the goal tolerance
-    if (isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
+    if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
       ROS_INFO("RRT* Global Planner: Path found!!!!");
       computeFinalPath(plan);
 
