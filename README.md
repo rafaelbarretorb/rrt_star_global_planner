@@ -103,6 +103,17 @@ To test the plugin just click on "2D Nav Goal" button (at the top) and choose a 
 
 **
 
+## Unit Tests
+TODO
+```rostest rrt_star_global_planner rrt_star.test```
+
+~/build
+```$ make tests```
+
+execute
+~/devel/lib/rrt_star_global_planner
+```$ ./test_rrt_star ```
+
 ## Errors and Issues
 
 If you find some error or issue, please create a new issue and help me to improve this package.

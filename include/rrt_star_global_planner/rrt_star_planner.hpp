@@ -91,9 +91,9 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan);
 
- private:
+ 
   std::pair<float, float> sampleFree();
-
+protected:
   bool collision(float wx, float wy);
 
   Node getNearest(const std::pair<float, float> &p_rand);
@@ -120,6 +120,8 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   std::string frame_id_;
   ros::Publisher plan_pub_;
 
+
+ private:
   float origin_x_;
   float origin_y_;
   float resolution_;
@@ -141,7 +143,6 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   // TODO
   //bool allow_unknown_{false};
   //boost::shared_ptr<NavFn> planner_;
-
 };
 }  // rrt_star_global_planner namespace
 #endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_PLANNER_HPP_

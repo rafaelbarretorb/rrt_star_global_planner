@@ -42,3 +42,26 @@ install(
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
+if (CATKIN_ENABLE_TESTING)
+  find_package(GTest REQUIRED)
+  find_package(rostest REQUIRED)
+
+  enable_testing()
+
+  include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+    ${catkin_INCLUDE_DIRS}
+  )
+
+  add_rostest_gtest(test_rrt_star
+    test/rrt_star.test
+    test/src/test_rrt_star.cpp
+  )
+
+  target_link_libraries(test_rrt_star
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}
+  )
+
+endif()
+
