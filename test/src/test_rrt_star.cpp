@@ -1,26 +1,40 @@
 #include <gtest/gtest.h>
 #include <ros/ros.h>
 
+#include <costmap_2d/costmap_2d.h>
 
-#include "rrt_star_global_planner/rrt_star_planner.hpp"
+#include <utility>
 
-using rrt_star_global_planner::RRTStarPlanner;
+#include "rrt_star_global_planner/rrt_star.hpp"
+
+using rrt_star_global_planner::RRTStar;
 
 
 int g_argc;
 char** g_argv;
 
-class RRTStarPlannerTest : public ::testing::Test {
+class RRTStarTest : public ::testing::Test {
  public:
-  RRTStarPlannerTest() {}
+  RRTStarTest() {}
+  virtual ~RRTStarTest() {}
 
- protected:
-  RRTStarPlanner global_planner_;
+  void SetUp() override {
+    std::pair<float, float> start = {0., 0.};
+    std::pair<float, float> goal = {5., 5.};
+    rrt_star = new RRTStar(start, goal, nullptr);
+  }
+
+  void TearDown() override {
+    delete rrt_star;
+    rrt_star = nullptr;
+  }
+
+  RRTStar *rrt_star{nullptr};
 };
 
 // just test the test, remove it
-TEST_F(RRTStarPlannerTest, getRandomDoubles) {
-  ASSERT_NE(1, 1);  // false
+TEST_F(RRTStarTest, getRandomDoubles) {
+  ASSERT_NE(1, 2);  // false
 }
 
 

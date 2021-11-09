@@ -116,7 +116,7 @@ protected:
   void computeFinalPath(std::vector<geometry_msgs::PoseStamped>& plan);
 
   costmap_2d::Costmap2D* costmap_{NULL};
-  costmap_2d::Costmap2DROS* costmap_ros_{NULL};
+  costmap_2d::Costmap2DROS* costmap_ros_{NULL};  // TODO chech to remove
   std::string frame_id_;
   ros::Publisher plan_pub_;
 

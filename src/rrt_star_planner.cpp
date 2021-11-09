@@ -74,6 +74,8 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap
 bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
                               const geometry_msgs::PoseStamped& goal,
                               std::vector<geometry_msgs::PoseStamped>& plan) {
+  // TODO check if start and goal are in the free space, return false otherwise
+
   //clear the plan, just in case
   plan.clear();
   node_count_ = 0;
