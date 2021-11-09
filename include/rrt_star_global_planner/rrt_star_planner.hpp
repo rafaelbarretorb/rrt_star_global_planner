@@ -17,7 +17,7 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 
-/** include standard libraries **/
+/** standard libraries **/
 #include <cmath>
 #include <string>
 #include <vector>
