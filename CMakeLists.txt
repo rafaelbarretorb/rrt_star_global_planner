@@ -30,7 +30,8 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-   src/rrt_star_planner.cpp
+  src/rrt_star_planner.cpp
+  src/rrt_star.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -64,4 +65,3 @@ if (CATKIN_ENABLE_TESTING)
   )
 
 endif()
-
