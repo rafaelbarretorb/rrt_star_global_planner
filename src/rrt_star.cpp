@@ -110,4 +110,40 @@ void RRTStar::setRadius(double radius) {
   radius_ = radius;
 }
 
+const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
+  // Start Node
+  createNewNode(start.pose.position.x, start.pose.position.x, -1);
+
+  std::list<std::pair<float, float>> path; // remove
+
+  // Add the initial Pose
+  plan.push_back(start);
+  
+  std::pair<float, float> p_rand;
+  std::pair<float, float> p_new;
+
+  Node node_nearest;
+
+  while(nodes_.size() < max_num_nodes_) {
+    bool found_next = false;
+    while (found_next == false) {
+      p_rand = sampleFree(); // random point in the free space
+      node_nearest = getNearest(p_rand); // The nearest node of the random point
+      p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
+      if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
+        found_next = true;
+        createNewNode(p_new.first, p_new.second, node_nearest.node_id);
+      }
+    }
+
+    // Check if the distance between the goal and the new node is less than the goal tolerance
+    if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
+      ROS_INFO("RRT* Global Planner: Path found!!!!");
+      computeFinalPath(plan);
+
+      return true;
+    }
+  }
+}
+
 }  // namespace rrt_star_global_planner

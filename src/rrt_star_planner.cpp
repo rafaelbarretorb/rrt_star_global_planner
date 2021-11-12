@@ -91,42 +91,20 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   // TODO remove this
   std::string global_frame = frame_id_;
 
-  // Start Node
-  createNewNode(start.pose.position.x, start.pose.position.x, -1);
+  std::pair<float, float> start_point = {start.pose.position.x, start.pose.position.y};
+  std::pair<float, float> goal_point = {goal.pose.position.x, goal.pose.position.y};
+  RRTStar rrt_star(start_point, goal_point, costmap_);
+  const auto& path = rrt_star.pathPlanning();
 
-  std::list<std::pair<float, float>> path; // remove
-
-  // Add the initial Pose
-  plan.push_back(start);
-  
-  std::pair<float, float> p_rand;
-  std::pair<float, float> p_new;
-
-  Node node_nearest;
-
-  while(nodes_.size() < max_num_nodes_) {
-    bool found_next = false;
-    while (found_next == false) {
-      p_rand = sampleFree(); // random point in the free space
-      node_nearest = getNearest(p_rand); // The nearest node of the random point
-      p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
-      if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
-        found_next = true;
-        createNewNode(p_new.first, p_new.second, node_nearest.node_id);
-      }
-    }
-
-    // Check if the distance between the goal and the new node is less than the goal tolerance
-    if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
-      ROS_INFO("RRT* Global Planner: Path found!!!!");
-      computeFinalPath(plan);
-
-      return true;
-    }
+  if(!path.empty()) {
+    ROS_INFO("RRT* Global Planner: Path found!!!!");
+    computeFinalPlan(path);
+    return true;
   }
 
   ROS_WARN("The planner failed to find a path, choose other goal position");
   return false;
+
 }
 
 std::pair<float, float> RRTStarPlanner::sampleFree() {

@@ -24,9 +24,10 @@
 #include <list>
 #include <utility>  // std::pair
 
-#include "rrt_star_global_planner/random_double_generator.hpp"
-#include "rrt_star_global_planner/node.hpp"
 
+#include "rrt_star_global_planner/node.hpp"
+#include "rrt_star_global_planner/rrt_star.hpp"
+#include "rrt_star_global_planner/random_double_generator.hpp"
 
 namespace rrt_star_global_planner {
 
@@ -35,9 +36,6 @@ namespace rrt_star_global_planner {
  * @param  name The name of this planner
  * @param  costmap A pointer to the ROS wrapper of the costmap to use
  */
-inline float euclideanDistance2D(float x1, float y1, float x2, float y2) {
-  return std::hypot((x1 - x2), (y1 - y2));
-}
 
 /**
  * @class RRTStarPlanner

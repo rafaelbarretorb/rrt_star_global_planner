@@ -47,6 +47,11 @@ class RRTStar {
 
   void setRadius(double radius);
 
+
+  void computeFinalPath();
+
+  const std::list<std::pair<float, float>> &pathPlanning();
+
  private:
   std::pair<float, float> start_point_;
   std::pair<float, float> goal_point_;
