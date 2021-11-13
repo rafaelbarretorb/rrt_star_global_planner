@@ -50,8 +50,9 @@ if (CATKIN_ENABLE_TESTING)
   enable_testing()
 
   include_directories(
-    ${PROJECT_SOURCE_DIR}/include
+    include
     ${catkin_INCLUDE_DIRS}
+    ${GTEST_INCLUDE_DIRS}
   )
 
   add_rostest_gtest(test_rrt_star
