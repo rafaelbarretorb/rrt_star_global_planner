@@ -9,10 +9,8 @@ jobs:
     strategy:
       matrix:
         env:
-          # - {ROS_DISTRO: melodic, ROS_REPO: testing}
           - {ROS_DISTRO: melodic, ROS_REPO: main}
-          # - {ROS_DISTRO: noetic, ROS_REPO: testing}
-          # - {ROS_DISTRO: noetic, ROS_REPO: main} # sudo cp *.a /usr/lib
+          - {ROS_DISTRO: noetic, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -25,5 +23,5 @@ jobs:
           sudo make
           sudo cp ./lib/libgtest.a /usr/lib
           sudo cp ./lib/libgtest_main.a /usr/lib
-      # - uses: 'ros-industrial/industrial_ci@master'
-      #   env: ${{matrix.env}}
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{matrix.env}}
