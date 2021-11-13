@@ -1,5 +1,6 @@
 # `rrt_star_global_planner`
-[![CI](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml/badge.svg?branch=enhancement%2Fadd-tests)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml)[![CI](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml/badge.svg?branch=enhancement%2Fadd-tests)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml)
+[![CI](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml/badge.svg?branch=enhancement%2Fadd-tests)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml) [![CI](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml/badge.svg?branch=enhancement%2Fadd-tests)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml)
+
 
 <p float="left">
   <img src="doc/rrt_star_husky_path.gif" width="600" />
@@ -105,12 +106,15 @@ To test the plugin just click on "2D Nav Goal" button (at the top) and choose a 
 
 ## Unit Tests
 Launch the tests verification:
+
 ```rostest rrt_star_global_planner rrt_star.test```
 
 Or build manually at ```~catkin_ws/build```:
+
 ```$ make tests```
 
 and execute each test manually at ```~catkin_ws/devel/lib/rrt_star_global_planner```:
+
 ```$ ./test_rrt_star ```
 
 ## Errors and Issues

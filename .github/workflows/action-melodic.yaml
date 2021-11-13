@@ -1,6 +1,6 @@
 # Based on https://github.com/ros-industrial/industrial_ci
 
-name: CI
+name: CI-Melodic
 
 on:
   pull_request:
