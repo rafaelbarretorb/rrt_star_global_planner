@@ -11,16 +11,26 @@ RRTStar::RRTStar(const std::pair<float, float> &start_point,
                  double radius,
                  double epsilon,
                  unsigned int max_num_nodes,
-                 unsigned int min_num_nodes) : start_point_(start_point),
-                                               goal_point_(goal_point),
-                                               costmap_(costmap),
-                                               goal_tolerance_(goal_tolerance),
-                                               radius_(radius),
-                                               epsilon_(epsilon),
-                                               max_num_nodes_(max_num_nodes),
-                                               min_num_nodes_(min_num_nodes) {
+                 unsigned int min_num_nodes,
+                 float map_width,
+                 float map_height) : start_point_(start_point),
+                                     goal_point_(goal_point),
+                                     costmap_(costmap),
+                                     goal_tolerance_(goal_tolerance),
+                                     radius_(radius),
+                                     epsilon_(epsilon),
+                                     max_num_nodes_(max_num_nodes),
+                                     min_num_nodes_(min_num_nodes),
+                                     map_width_(map_width),
+                                     map_height_(map_height) {
   // Set range
   random_double_.setRange(-map_width_, map_width_);
+
+  if(costmap_ != nullptr) {
+    resolution_ = costmap_->getResolution();
+    origin_x_ = costmap_->getOriginX();
+    origin_y_ = costmap_->getOriginY();
+  }
 }
 
 std::pair<float, float> RRTStar::sampleFree() {
@@ -47,10 +57,38 @@ int RRTStar::getNearestNodeId(const std::pair<float, float> &p_rand) {
 }
 
 bool RRTStar::collision(float wx, float wy) {
+  // In case of no costmap loaded
+  if(costmap_ == nullptr) {
+    return false;
+  }
+
+  // TODO check this method
+  int mx, my;
+  worldToMap(wx, wy, mx, my);
+
+  if ((mx < 0) || (my < 0) || (mx >= costmap_->getSizeInCellsX()) || (my >= costmap_->getSizeInCellsY()))
+    return true;
+
+  // TODO static_cast? check this 
+  unsigned int cost = static_cast<int>(costmap_->getCost(mx, my));
+  if (cost > 0)
+    return true;
+  
   return false;
 }
 
+void RRTStar::worldToMap(float wx, float wy, int& mx, int& my) {
+  mx = (wx - origin_x_) / resolution_;
+  my = (wy - origin_y_) / resolution_;
+}
+
 bool RRTStar::obstacleFree(const Node &node_nearest, float px, float py) {
+  // In case of no costmap loaded
+  if(costmap_ == nullptr) {
+    // no obstacles
+    return true;
+  }
+
   int n = 1;
   float theta;
 
@@ -81,7 +119,7 @@ bool RRTStar::obstacleFree(const Node &node_nearest, float px, float py) {
 }
 
 bool RRTStar::obstacleFree(const Node &node1, const Node &node2) {
-  obstacleFree(node1, node2.x, node2.y);
+  return obstacleFree(node1, node2.x, node2.y);
 }
 
 void RRTStar::createNewNode(float x, float y, int node_nearest_id) {
@@ -180,10 +218,10 @@ void RRTStar::setRadius(double radius) {
 }
 
 const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
+  path_.clear();
+
   // Start Node
   createNewNode(start_point_.first, start_point_.second, -1);
-
-  std::list<std::pair<float, float>> path;
 
   std::pair<float, float> p_rand;
   std::pair<float, float> p_new;
@@ -204,16 +242,13 @@ const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
 
     // Check if the distance between the goal and the new node is less than the goal tolerance
     if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
-      computeFinalPath(path);
-
-      return path;
+      computeFinalPath();
     }
   }
+  return path_;
 }
 
-void RRTStar::computeFinalPath(std::list<std::pair<float, float>> &path) {
-  path.clear();
-
+void RRTStar::computeFinalPath() {
   // New goal inside of the goal tolerance
   Node current_node = nodes_.back();
 
@@ -223,7 +258,7 @@ void RRTStar::computeFinalPath(std::list<std::pair<float, float>> &path) {
   do {
     point.first = current_node.x;
     point.second = current_node.y;
-    path.push_front(point);
+    path_.push_front(point);
 
     // update the current node
     current_node = nodes_[current_node.parent_id];

@@ -32,11 +32,14 @@ class RRTStar {
           double radius,
           double epsilon,
           unsigned int max_num_nodes,
-          unsigned int min_num_nodes);
+          unsigned int min_num_nodes,
+          float map_width,
+          float map_height
+          );
 
   std::pair<float, float> sampleFree();
 
-  int RRTStar::getNearestNodeId(const std::pair<float, float> &p_rand);
+  int getNearestNodeId(const std::pair<float, float> &p_rand);
 
   bool collision(float wx, float wy);
 
@@ -63,6 +66,8 @@ class RRTStar {
 
   bool isGoalReached(const std::pair<float, float> &p_new);
 
+  void worldToMap(float wx, float wy, int& mx, int& my);
+
  private:
   std::pair<float, float> start_point_;
   std::pair<float, float> goal_point_;
@@ -72,12 +77,15 @@ class RRTStar {
   int node_count_{0};
   float map_width_;
   float map_height_;
-  double radius_{1.3};
+  double radius_{1.3};  // TODO remove this initialization
   unsigned int max_num_nodes_;
   unsigned int min_num_nodes_;
   double goal_tolerance_;
   double epsilon_;
-  float resolution_{0.0};
+  float resolution_;
+  float origin_x_;
+  float origin_y_;
+  std::list<std::pair<float, float>> path_;
 };
 
 }  // namespace rrt_star_global_planner

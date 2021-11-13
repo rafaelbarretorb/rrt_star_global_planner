@@ -92,26 +92,9 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
  
   std::pair<float, float> sampleFree();
 protected:
-  bool collision(float wx, float wy);
 
-  Node getNearest(const std::pair<float, float> &p_rand);
-
-  void chooseParent(int node_nearest_id);
-
-  void rewire();
-
-  // TODO change parameters name
-  std::pair<float, float> steer(float x1, float y1, float x2, float y2);
-
-  bool obstacleFree(const Node &node_nearest, float px, float py);
-
-  void worldToMap(float wx, float wy, int& mx, int& my);
-
-  bool isGoalReached(const std::pair<float, float> &p_new);
-
-  void createNewNode(float x, float y, int node_nearest_id);
-
-  void computeFinalPath(std::vector<geometry_msgs::PoseStamped>& plan);
+  void computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,
+                        const std::list<std::pair<float, float>> &path);
 
   costmap_2d::Costmap2D* costmap_{NULL};
   costmap_2d::Costmap2DROS* costmap_ros_{NULL};  // TODO chech to remove
@@ -137,6 +120,7 @@ protected:
   double goal_tolerance_;
   RandomDoubleGenerator random_double_;
   int node_count_{0};
+  bool search_specific_area_{true};
 
   // TODO
   //bool allow_unknown_{false};
