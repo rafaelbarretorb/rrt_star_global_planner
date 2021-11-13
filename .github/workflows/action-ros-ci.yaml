@@ -19,11 +19,13 @@ jobs:
       - name: Configure ROS for install
         run: |
           sudo apt-get install libgtest-dev
-          sudo apt-get install cmake # install cmake
+          sudo apt-get install cmake
           cd /usr/src/gtest
           sudo cmake CMakeLists.txt
           sudo make
+          cd lib
+          ls
           sudo cp ./lib/x86_64-linux-gnu/libgtest.a /usr/lib
           sudo cp ./lib/x86_64-linux-gnu/libgtest_main.a /usr/lib
-      - uses: 'ros-industrial/industrial_ci@master'
-        env: ${{matrix.env}}
+      # - uses: 'ros-industrial/industrial_ci@master'
+      #   env: ${{matrix.env}}
