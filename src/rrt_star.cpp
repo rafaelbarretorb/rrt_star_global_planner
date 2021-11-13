@@ -1,6 +1,9 @@
+/*
 
+*/
 
 #include "rrt_star_global_planner/rrt_star.hpp"
+
 
 namespace rrt_star_global_planner {
 
@@ -53,9 +56,9 @@ bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
   while(nodes_.size() < max_num_nodes_) {
     found_next = false;
     while (!found_next) {
-      p_rand = sampleFree(); // random point in the free space
-      node_nearest = nodes_[getNearestNodeId(p_rand)]; // The nearest node of the random point
-      p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
+      p_rand = sampleFree();  // random point in the free space
+      node_nearest = nodes_[getNearestNodeId(p_rand)];  // nearest node of the random point
+      p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second);  // new point and node candidate
       if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
         found_next = true;
         createNewNode(p_new.first, p_new.second, node_nearest.node_id);
@@ -100,6 +103,7 @@ int RRTStar::getNearestNodeId(const std::pair<float, float> &point) {
 bool RRTStar::collision(float wx, float wy) {
   // In case of no costmap loaded
   if(costmap_ == nullptr) {
+    // no collision 
     return false;
   }
 
@@ -245,7 +249,7 @@ std::pair<float, float> RRTStar::steer(float x1, float y1, float x2, float y2) {
   }
 }
 
-const std::vector<Node> &RRTStar::getNodes() {
+std::vector<Node> RRTStar::getNodes() const {
   return nodes_;
 }
 
@@ -266,10 +270,6 @@ void RRTStar::computeFinalPath(std::list<std::pair<float, float>> &path) {
     // update the current node
     current_node = nodes_[current_node.parent_id];
   } while (current_node.parent_id != -1);
-
-  for(const auto &p : path) {
-    std::cout << "( x , y ) = ( " << p.first << " , " << p.second << " )" << std::endl; 
-  }
 }
 
 bool RRTStar::isGoalReached(const std::pair<float, float> &p_new) {

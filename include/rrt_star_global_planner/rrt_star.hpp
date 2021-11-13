@@ -17,8 +17,6 @@
 #include "rrt_star_global_planner/random_double_generator.hpp"
 #include "rrt_star_global_planner/node.hpp"
 
-// TODO remove
-#include <iostream>
 
 namespace rrt_star_global_planner {
 
@@ -37,8 +35,7 @@ class RRTStar {
           unsigned int max_num_nodes,
           unsigned int min_num_nodes,
           float map_width,
-          float map_height
-          );
+          float map_height);
 
   bool pathPlanning(std::list<std::pair<float, float>> &path);
 
@@ -61,7 +58,7 @@ class RRTStar {
   // TODO change parameters name
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
-  const std::vector<Node> &getNodes();
+  std::vector<Node> getNodes() const;
 
   void computeFinalPath(std::list<std::pair<float, float>> &path);
 
