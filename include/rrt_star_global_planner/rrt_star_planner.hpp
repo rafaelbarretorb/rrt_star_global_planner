@@ -17,16 +17,17 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 
-/** include standard libraries **/
+/** standard libraries **/
 #include <cmath>
 #include <string>
 #include <vector>
 #include <list>
 #include <utility>  // std::pair
 
-#include "rrt_star_global_planner/random_double_generator.hpp"
-#include "rrt_star_global_planner/node.hpp"
 
+#include "rrt_star_global_planner/node.hpp"
+#include "rrt_star_global_planner/rrt_star.hpp"
+#include "rrt_star_global_planner/random_double_generator.hpp"
 
 namespace rrt_star_global_planner {
 
@@ -35,9 +36,6 @@ namespace rrt_star_global_planner {
  * @param  name The name of this planner
  * @param  costmap A pointer to the ROS wrapper of the costmap to use
  */
-inline float euclideanDistance2D(float x1, float y1, float x2, float y2) {
-  return std::hypot((x1 - x2), (y1 - y2));
-}
 
 /**
  * @class RRTStarPlanner
@@ -91,35 +89,20 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan);
 
- private:
+ 
   std::pair<float, float> sampleFree();
+protected:
 
-  bool collision(float wx, float wy);
-
-  Node getNearest(const std::pair<float, float> &p_rand);
-
-  void chooseParent(int node_nearest_id);
-
-  void rewire();
-
-  // TODO change parameters name
-  std::pair<float, float> steer(float x1, float y1, float x2, float y2);
-
-  bool obstacleFree(const Node &node_nearest, float px, float py);
-
-  void worldToMap(float wx, float wy, int& mx, int& my);
-
-  bool isGoalReached(const std::pair<float, float> &p_new);
-
-  void createNewNode(float x, float y, int node_nearest_id);
-
-  void computeFinalPath(std::vector<geometry_msgs::PoseStamped>& plan);
+  void computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,
+                        const std::list<std::pair<float, float>> &path);
 
   costmap_2d::Costmap2D* costmap_{NULL};
-  costmap_2d::Costmap2DROS* costmap_ros_{NULL};
+  costmap_2d::Costmap2DROS* costmap_ros_{NULL};  // TODO chech to remove
   std::string frame_id_;
   ros::Publisher plan_pub_;
 
+
+ private:
   float origin_x_;
   float origin_y_;
   float resolution_;
@@ -137,11 +120,11 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   double goal_tolerance_;
   RandomDoubleGenerator random_double_;
   int node_count_{0};
+  bool search_specific_area_{true};
 
   // TODO
   //bool allow_unknown_{false};
   //boost::shared_ptr<NavFn> planner_;
-
 };
 }  // rrt_star_global_planner namespace
 #endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_PLANNER_HPP_

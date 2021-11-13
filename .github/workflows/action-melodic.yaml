@@ -1,20 +1,19 @@
 # Based on https://github.com/ros-industrial/industrial_ci
 
-name: CI
+name: CI-Melodic
 
-on: pull_request
-
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
 jobs:
   industrial_ci:
     strategy:
       matrix:
         env:
-          - {ROS_DISTRO: melodic, ROS_REPO: testing}
           - {ROS_DISTRO: melodic, ROS_REPO: main}
-          - {ROS_DISTRO: noetic, ROS_REPO: testing}
-          - {ROS_DISTRO: noetic, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}

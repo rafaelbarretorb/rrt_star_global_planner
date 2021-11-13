@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+
+<launch>
+  <test test-name="rrt_star" pkg="rrt_star_global_planner" type="test_rrt_star" />
+</launch>
