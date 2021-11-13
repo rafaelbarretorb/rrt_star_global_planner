@@ -5,7 +5,7 @@ name: CI-Melodic
 on:
   pull_request:
     paths-ignore:
-      - '**/README.md'
+      - '**.md'
 jobs:
   industrial_ci:
     strategy:
