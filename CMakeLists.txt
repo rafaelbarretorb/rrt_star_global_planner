@@ -63,6 +63,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_rrt_star
     ${catkin_LIBRARIES}
     ${PROJECT_NAME}
+    GTest::GTest
   )
 
 endif()
