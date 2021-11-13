@@ -6,4 +6,4 @@ RRTStarPlanner:
   radius: 1.05
   epsilon: 0.21
   max_num_nodes: 10001
-  min_num_nodes: 1001
+  min_num_nodes: 1501
