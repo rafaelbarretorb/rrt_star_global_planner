@@ -1,5 +1,5 @@
 # `rrt_star_global_planner`
-[![CI](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml/badge.svg?branch=enhancement%2Fadd-tests)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml) [![CI](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml/badge.svg?branch=enhancement%2Fadd-tests)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml)
+[![CI-Melodic](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml/badge.svg)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml) [![CI-Noetic](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml/badge.svg)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml)
 
 
 <p float="left">
