@@ -183,7 +183,7 @@ const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
   // Start Node
   createNewNode(start_point_.first, start_point_.second, -1);
 
-  std::list<std::pair<float, float>> path; // remove
+  std::list<std::pair<float, float>> path;
 
   std::pair<float, float> p_rand;
   std::pair<float, float> p_new;
@@ -204,19 +204,18 @@ const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
 
     // Check if the distance between the goal and the new node is less than the goal tolerance
     if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
-      computeFinalPath(plan);
+      computeFinalPath(path);
 
-      return true;
+      return path;
     }
   }
 }
 
-void RRTStar::computeFinalPath() {
-  std::list<std::pair<float, float>> path;
+void RRTStar::computeFinalPath(std::list<std::pair<float, float>> &path) {
+  path.clear();
 
   // New goal inside of the goal tolerance
-  goal_node_ = nodes_.back();
-  Node current_node = goal_node_;
+  Node current_node = nodes_.back();
 
   // Final Path
   std::pair<float, float> point;
@@ -234,8 +233,8 @@ void RRTStar::computeFinalPath() {
 bool RRTStar::isGoalReached(const std::pair<float, float> &p_new) {
   return (euclideanDistance2D(p_new.first,
                               p_new.second,
-                              goal_node_.x,
-                              goal_node_.y) < goal_tolerance_) ? true : false;
+                              goal_point_.first,
+                              goal_point_.second) < goal_tolerance_) ? true : false;
 }
 
 }  // namespace rrt_star_global_planner
