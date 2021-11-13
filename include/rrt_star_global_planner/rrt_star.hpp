@@ -4,7 +4,7 @@
 #ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
 #define RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
 
-
+#include <ros/ros.h>
 #include <costmap_2d/costmap_2d.h>
 
 /** standard libraries **/
@@ -16,6 +16,9 @@
 
 #include "rrt_star_global_planner/random_double_generator.hpp"
 #include "rrt_star_global_planner/node.hpp"
+
+// TODO remove
+#include <iostream>
 
 namespace rrt_star_global_planner {
 
@@ -36,6 +39,8 @@ class RRTStar {
           float map_width,
           float map_height
           );
+
+  bool pathPlanning(std::list<std::pair<float, float>> &path);
 
   std::pair<float, float> sampleFree();
 
@@ -60,9 +65,7 @@ class RRTStar {
 
   void setRadius(double radius);
 
-  void computeFinalPath();
-
-  const std::list<std::pair<float, float>> &pathPlanning();
+  void computeFinalPath(std::list<std::pair<float, float>> &path);
 
   bool isGoalReached(const std::pair<float, float> &p_new);
 
@@ -85,7 +88,10 @@ class RRTStar {
   float resolution_;
   float origin_x_;
   float origin_y_;
-  std::list<std::pair<float, float>> path_;
+
+  bool goal_reached_{false};
+
+  Node goal_node_;
 };
 
 }  // namespace rrt_star_global_planner

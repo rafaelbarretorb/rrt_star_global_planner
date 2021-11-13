@@ -33,6 +33,53 @@ RRTStar::RRTStar(const std::pair<float, float> &start_point,
   }
 }
 
+bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
+  goal_reached_ = false;
+
+  if(collision(goal_point_.first, goal_point_.second)) {
+    ROS_ERROR("Goal point chosen is NOT in the FREE SPACE! Choose other goal!");
+    return false;
+  }
+
+  // Start Node
+  createNewNode(start_point_.first, start_point_.second, -1);
+
+  std::pair<float, float> p_rand;
+  std::pair<float, float> p_new;
+
+  Node node_nearest;
+
+  bool found_next;
+  while(nodes_.size() < max_num_nodes_) {
+    found_next = false;
+    while (!found_next) {
+      p_rand = sampleFree(); // random point in the free space
+      node_nearest = nodes_[getNearestNodeId(p_rand)]; // The nearest node of the random point
+      p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
+      if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
+        found_next = true;
+        createNewNode(p_new.first, p_new.second, node_nearest.node_id);
+      }
+    }
+
+    if(!goal_reached_) {
+      if(isGoalReached(p_new)) {
+        goal_reached_ = true;
+        goal_node_ = nodes_.back();
+        std::cout << "( x , y ) = ( " << goal_node_.x << " , " << goal_node_.y << " )" << std::endl;
+      }
+    }
+
+    // Check if the distance between the goal and the new node is less than the goal tolerance
+    if(goal_reached_ && nodes_.size() > min_num_nodes_) {
+      
+      computeFinalPath(path);
+      return true;
+    }
+  }
+  return false;
+}
+
 std::pair<float, float> RRTStar::sampleFree() {
   std::pair<float, float> random_point;
   random_point.first = random_double_.generate();
@@ -157,7 +204,7 @@ void RRTStar::chooseParent(int node_nearest_id) {
       cost_other_parent = node.cost + nodes_dist;
 
       if (cost_other_parent < cost_new_node) {
-        if (obstacleFree(node, new_node.x, new_node.y)) {
+        if (obstacleFree(node, new_node)) {
           parent_node = node;
         }
       }
@@ -184,7 +231,7 @@ void RRTStar::rewire() {
       // cost if the parent of node is new_node
       cost_node = new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
 
-      if(cost_node < node.cost && obstacleFree(node, new_node.x, new_node.y)) {
+      if(cost_node < node.cost && obstacleFree(node, new_node)) {
         // update the new parent of node and its new cost
         node.parent_id = new_node.node_id;
         node.cost = cost_node;
@@ -217,38 +264,9 @@ void RRTStar::setRadius(double radius) {
   radius_ = radius;
 }
 
-const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
-  path_.clear();
-
-  // Start Node
-  createNewNode(start_point_.first, start_point_.second, -1);
-
-  std::pair<float, float> p_rand;
-  std::pair<float, float> p_new;
-
-  Node node_nearest;
-
-  while(nodes_.size() < max_num_nodes_) {
-    bool found_next = false;
-    while (found_next == false) {
-      p_rand = sampleFree(); // random point in the free space
-      node_nearest = nodes_[getNearestNodeId(p_rand)]; // The nearest node of the random point
-      p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
-      if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
-        found_next = true;
-        createNewNode(p_new.first, p_new.second, node_nearest.node_id);
-      }
-    }
-
-    // Check if the distance between the goal and the new node is less than the goal tolerance
-    if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
-      computeFinalPath();
-    }
-  }
-  return path_;
-}
-
-void RRTStar::computeFinalPath() {
+void RRTStar::computeFinalPath(std::list<std::pair<float, float>> &path) {
+  //
+  path.clear();
   // New goal inside of the goal tolerance
   Node current_node = nodes_.back();
 
@@ -258,11 +276,15 @@ void RRTStar::computeFinalPath() {
   do {
     point.first = current_node.x;
     point.second = current_node.y;
-    path_.push_front(point);
+    path.push_front(point);
 
     // update the current node
     current_node = nodes_[current_node.parent_id];
   } while (current_node.parent_id != -1);
+
+  for(const auto &p : path) {
+    std::cout << "( x , y ) = ( " << p.first << " , " << p.second << " )" << std::endl; 
+  }
 }
 
 bool RRTStar::isGoalReached(const std::pair<float, float> &p_new) {

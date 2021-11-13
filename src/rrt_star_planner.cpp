@@ -106,17 +106,16 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
                    map_width_,
                    map_height_);
 
-  //
-  const auto& path = rrt_star.pathPlanning();
+  std::list<std::pair<float, float>> path;
 
-  if(!path.empty()) {
+  if(rrt_star.pathPlanning(path)) {
     ROS_INFO("RRT* Global Planner: Path found!!!!");
     computeFinalPlan(plan, path);
     return true;
+  } else {
+    ROS_WARN("The planner failed to find a path, choose other goal position");
+    return false;
   }
-
-  ROS_WARN("The planner failed to find a path, choose other goal position");
-  return false;
 }
 
 void  RRTStarPlanner::computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,
