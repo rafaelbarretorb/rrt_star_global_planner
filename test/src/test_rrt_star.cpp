@@ -23,8 +23,16 @@ class RRTStarTest : public ::testing::Test {
   void SetUp() override {
     std::pair<float, float> start = {0., 0.};
     std::pair<float, float> goal = {5., 5.};
-    rrt_star = new RRTStar(start, goal, nullptr);
-    rrt_star->setRadius(1.3);
+    rrt_star = new RRTStar(start,
+                           goal,
+                           nullptr,
+                           0.2,
+                           1.3,
+                           0.2,
+                           10000,
+                           1000,
+                           10.0,
+                           10.0);
 
     rrt_star->createNewNode(0.5, 0.5, -1);  // 0
     rrt_star->createNewNode(-0.5, 1.5, 0);  // 1
@@ -55,7 +63,7 @@ TEST_F(RRTStarTest, RewireNodesAroundNewNode) {
 }
 
 TEST_F(RRTStarTest, NewNodeFinalCost) {
-  const std::vector<Node> &nodes = rrt_star->getNodes();
+  std::vector<Node> nodes = rrt_star->getNodes();
   EXPECT_NEAR(nodes.back().cost, 3.5478, 0.001);
 }
 
