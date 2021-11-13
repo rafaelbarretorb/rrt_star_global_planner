@@ -6,7 +6,19 @@ namespace rrt_star_global_planner {
 
 RRTStar::RRTStar(const std::pair<float, float> &start_point,
                  const std::pair<float, float> &goal_point,
-                 costmap_2d::Costmap2D* costmap) {
+                 costmap_2d::Costmap2D* costmap,
+                 double goal_tolerance,
+                 double radius,
+                 double epsilon,
+                 unsigned int max_num_nodes,
+                 unsigned int min_num_nodes) : start_point_(start_point),
+                                               goal_point_(goal_point),
+                                               costmap_(costmap),
+                                               goal_tolerance_(goal_tolerance),
+                                               radius_(radius),
+                                               epsilon_(epsilon),
+                                               max_num_nodes_(max_num_nodes),
+                                               min_num_nodes_(min_num_nodes) {
   // Set range
   random_double_.setRange(-map_width_, map_width_);
 }
@@ -19,16 +31,57 @@ std::pair<float, float> RRTStar::sampleFree() {
   return random_point;
 }
 
+int RRTStar::getNearestNodeId(const std::pair<float, float> &p_rand) {
+  
+  float dist_nearest, dist;
+  Node node_nearest = nodes_[0];
+
+  // TODO range loop
+  for (int i = 1; i < nodes_.size(); ++i) {
+    dist_nearest = euclideanDistance2D(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second);
+    dist = euclideanDistance2D(nodes_[i].x, nodes_[i].y, p_rand.first, p_rand.second);
+    if (dist < dist_nearest) node_nearest = nodes_[i];
+  }
+
+  return node_nearest.node_id;
+}
+
 bool RRTStar::collision(float wx, float wy) {
   return false;
 }
 
-bool RRTStar::obstacleFree(const Node &node, float px, float py) {
-  return true;
+bool RRTStar::obstacleFree(const Node &node_nearest, float px, float py) {
+  int n = 1;
+  float theta;
+
+  std::pair<float, float> p_n;
+  p_n.first = 0.0;
+  p_n.second = 0.0;
+
+  float dist = euclideanDistance2D(node_nearest.x, node_nearest.y, px, py);
+  if (dist < resolution_) {
+    if (collision(px, py))
+      return false;
+    else
+      return true;
+  } else {
+    int value = int(floor(dist/resolution_));
+    float theta;
+    for (int i = 0; i < value; i++) {
+      theta = atan2(node_nearest.y - py, node_nearest.x - px);
+      p_n.first = node_nearest.x + n*resolution_*cos(theta);
+      p_n.second = node_nearest.y + n*resolution_*sin(theta);
+      if (collision(p_n.first, p_n.second))
+        return false;
+      
+      n++;
+    }
+    return true;
+  }
 }
 
 bool RRTStar::obstacleFree(const Node &node1, const Node &node2) {
-  return true;
+  obstacleFree(node1, node2.x, node2.y);
 }
 
 void RRTStar::createNewNode(float x, float y, int node_nearest_id) {
@@ -102,6 +155,22 @@ void RRTStar::rewire() {
   }
 }
 
+// TODO change parameters name
+std::pair<float, float> RRTStar::steer(float x1, float y1, float x2, float y2) {
+  std::pair<float, float> p_new;
+  float dist = euclideanDistance2D(x1, y1, x2, y2);
+  if (dist < epsilon_) {
+    p_new.first = x1;
+    p_new.second = y1;
+    return p_new;
+  } else {
+    float theta = atan2(y2-y1, x2-x1);
+    p_new.first = x1 + epsilon_*cos(theta);
+    p_new.second = y1 + epsilon_*sin(theta);
+    return p_new;
+  }
+}
+
 const std::vector<Node> &RRTStar::getNodes() {
   return nodes_;
 }
@@ -112,13 +181,10 @@ void RRTStar::setRadius(double radius) {
 
 const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
   // Start Node
-  createNewNode(start.pose.position.x, start.pose.position.x, -1);
+  createNewNode(start_point_.first, start_point_.second, -1);
 
   std::list<std::pair<float, float>> path; // remove
 
-  // Add the initial Pose
-  plan.push_back(start);
-  
   std::pair<float, float> p_rand;
   std::pair<float, float> p_new;
 
@@ -128,7 +194,7 @@ const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
     bool found_next = false;
     while (found_next == false) {
       p_rand = sampleFree(); // random point in the free space
-      node_nearest = getNearest(p_rand); // The nearest node of the random point
+      node_nearest = nodes_[getNearestNodeId(p_rand)]; // The nearest node of the random point
       p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second); // new point and node candidate.
       if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
         found_next = true;
@@ -138,12 +204,38 @@ const std::list<std::pair<float, float>> &RRTStar::pathPlanning() {
 
     // Check if the distance between the goal and the new node is less than the goal tolerance
     if(isGoalReached(p_new) && nodes_.size() > min_num_nodes_) {
-      ROS_INFO("RRT* Global Planner: Path found!!!!");
       computeFinalPath(plan);
 
       return true;
     }
   }
+}
+
+void RRTStar::computeFinalPath() {
+  std::list<std::pair<float, float>> path;
+
+  // New goal inside of the goal tolerance
+  goal_node_ = nodes_.back();
+  Node current_node = goal_node_;
+
+  // Final Path
+  std::pair<float, float> point;
+
+  do {
+    point.first = current_node.x;
+    point.second = current_node.y;
+    path.push_front(point);
+
+    // update the current node
+    current_node = nodes_[current_node.parent_id];
+  } while (current_node.parent_id != -1);
+}
+
+bool RRTStar::isGoalReached(const std::pair<float, float> &p_new) {
+  return (euclideanDistance2D(p_new.first,
+                              p_new.second,
+                              goal_node_.x,
+                              goal_node_.y) < goal_tolerance_) ? true : false;
 }
 
 }  // namespace rrt_star_global_planner

@@ -4,7 +4,7 @@
 #ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
 #define RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
 
-#include <ros/ros.h>
+
 #include <costmap_2d/costmap_2d.h>
 
 /** standard libraries **/
@@ -27,9 +27,16 @@ class RRTStar {
  public:
   RRTStar(const std::pair<float, float> &start_point,
           const std::pair<float, float> &goal_point,
-          costmap_2d::Costmap2D* costmap);
+          costmap_2d::Costmap2D* costmap,
+          double goal_tolerance,
+          double radius,
+          double epsilon,
+          unsigned int max_num_nodes,
+          unsigned int min_num_nodes);
 
   std::pair<float, float> sampleFree();
+
+  int RRTStar::getNearestNodeId(const std::pair<float, float> &p_rand);
 
   bool collision(float wx, float wy);
 
@@ -43,24 +50,34 @@ class RRTStar {
 
   void rewire();
 
+  // TODO change parameters name
+  std::pair<float, float> steer(float x1, float y1, float x2, float y2);
+
   const std::vector<Node> &getNodes();
 
   void setRadius(double radius);
-
 
   void computeFinalPath();
 
   const std::list<std::pair<float, float>> &pathPlanning();
 
+  bool isGoalReached(const std::pair<float, float> &p_new);
+
  private:
   std::pair<float, float> start_point_;
   std::pair<float, float> goal_point_;
+  costmap_2d::Costmap2D* costmap_{nullptr};
   std::vector<Node> nodes_;
   RandomDoubleGenerator random_double_;
   int node_count_{0};
   float map_width_;
   float map_height_;
   double radius_{1.3};
+  unsigned int max_num_nodes_;
+  unsigned int min_num_nodes_;
+  double goal_tolerance_;
+  double epsilon_;
+  float resolution_{0.0};
 };
 
 }  // namespace rrt_star_global_planner
