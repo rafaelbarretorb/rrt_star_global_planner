@@ -23,8 +23,7 @@ jobs:
           cd /usr/src/gtest
           sudo cmake CMakeLists.txt
           sudo make
-          ls
-          sudo cp libgtest.a /usr/lib
-          sudo cp libgtest_main.a /usr/lib
+          sudo cp ./lib/x86_64-linux-gnu/libgtest.a /usr/lib
+          sudo cp ./lib/x86_64-linux-gnu/libgtest_main.a /usr/lib
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}
