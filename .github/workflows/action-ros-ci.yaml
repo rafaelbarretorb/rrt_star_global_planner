@@ -12,7 +12,7 @@ jobs:
           # - {ROS_DISTRO: melodic, ROS_REPO: testing}
           - {ROS_DISTRO: melodic, ROS_REPO: main}
           # - {ROS_DISTRO: noetic, ROS_REPO: testing}
-          # - {ROS_DISTRO: noetic, ROS_REPO: main}
+          # - {ROS_DISTRO: noetic, ROS_REPO: main} # sudo cp *.a /usr/lib
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -23,6 +23,5 @@ jobs:
           cd /usr/src/gtest
           sudo cmake CMakeLists.txt
           sudo make
-          sudo cp *.a /usr/lib
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}
