@@ -5,7 +5,7 @@
   <img src="doc/rrt_star_husky_path.gif" width="600" />
 </p>
 
-This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) path planning algorithm. I tried to keep the code simple and clean to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
+This is a ROS Global Planner Plugin that implements the RRT* (Rapidly-exploring Random Tree Star) path planning algorithm. I tried to keep the code clean to help everyone that is learning ROS and the Navigation Stack. I had several difficulties learning how to write my first Global Planner Plugin and I hope this package helps you to learn it faster.
 
 ## RRT* Algorithm Performance
 
