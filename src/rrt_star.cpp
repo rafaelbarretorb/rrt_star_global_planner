@@ -66,13 +66,10 @@ bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
       if(isGoalReached(p_new)) {
         goal_reached_ = true;
         goal_node_ = nodes_.back();
-        std::cout << "( x , y ) = ( " << goal_node_.x << " , " << goal_node_.y << " )" << std::endl;
       }
     }
 
-    // Check if the distance between the goal and the new node is less than the goal tolerance
     if(goal_reached_ && nodes_.size() > min_num_nodes_) {
-      
       computeFinalPath(path);
       return true;
     }
@@ -88,15 +85,12 @@ std::pair<float, float> RRTStar::sampleFree() {
   return random_point;
 }
 
-int RRTStar::getNearestNodeId(const std::pair<float, float> &p_rand) {
-  
+int RRTStar::getNearestNodeId(const std::pair<float, float> &point) {
   float dist_nearest, dist;
   Node node_nearest = nodes_[0];
-
-  // TODO range loop
   for (int i = 1; i < nodes_.size(); ++i) {
-    dist_nearest = euclideanDistance2D(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second);
-    dist = euclideanDistance2D(nodes_[i].x, nodes_[i].y, p_rand.first, p_rand.second);
+    dist_nearest = euclideanDistance2D(node_nearest.x, node_nearest.y, point.first, point.second);
+    dist = euclideanDistance2D(nodes_[i].x, nodes_[i].y, point.first, point.second);
     if (dist < dist_nearest) node_nearest = nodes_[i];
   }
 
@@ -122,11 +116,6 @@ bool RRTStar::collision(float wx, float wy) {
     return true;
   
   return false;
-}
-
-void RRTStar::worldToMap(float wx, float wy, int& mx, int& my) {
-  mx = (wx - origin_x_) / resolution_;
-  my = (wy - origin_y_) / resolution_;
 }
 
 bool RRTStar::obstacleFree(const Node &node_nearest, float px, float py) {
@@ -260,10 +249,6 @@ const std::vector<Node> &RRTStar::getNodes() {
   return nodes_;
 }
 
-void RRTStar::setRadius(double radius) {
-  radius_ = radius;
-}
-
 void RRTStar::computeFinalPath(std::list<std::pair<float, float>> &path) {
   //
   path.clear();
@@ -292,6 +277,11 @@ bool RRTStar::isGoalReached(const std::pair<float, float> &p_new) {
                               p_new.second,
                               goal_point_.first,
                               goal_point_.second) < goal_tolerance_) ? true : false;
+}
+
+void RRTStar::worldToMap(float wx, float wy, int& mx, int& my) {
+  mx = (wx - origin_x_) / resolution_;
+  my = (wy - origin_y_) / resolution_;
 }
 
 }  // namespace rrt_star_global_planner

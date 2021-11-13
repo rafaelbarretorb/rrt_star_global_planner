@@ -44,7 +44,7 @@ class RRTStar {
 
   std::pair<float, float> sampleFree();
 
-  int getNearestNodeId(const std::pair<float, float> &p_rand);
+  int getNearestNodeId(const std::pair<float, float> &point);
 
   bool collision(float wx, float wy);
 
@@ -62,8 +62,6 @@ class RRTStar {
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
   const std::vector<Node> &getNodes();
-
-  void setRadius(double radius);
 
   void computeFinalPath(std::list<std::pair<float, float>> &path);
 
