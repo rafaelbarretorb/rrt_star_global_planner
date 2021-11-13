@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: 'ros-industrial/industrial_ci@master'
-        env: ${{matrix.env}}
       - name: Configure ROS for install
         run: |
           sudo apt-get install libgtest-dev
@@ -26,4 +24,5 @@ jobs:
           sudo cmake CMakeLists.txt
           sudo make
           sudo cp *.a /usr/lib
-
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{matrix.env}}
