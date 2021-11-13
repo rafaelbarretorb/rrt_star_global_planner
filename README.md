@@ -104,14 +104,13 @@ To test the plugin just click on "2D Nav Goal" button (at the top) and choose a 
 **
 
 ## Unit Tests
-TODO
+Launch the tests verification:
 ```rostest rrt_star_global_planner rrt_star.test```
 
-~/build
+Or build manually at ```~catkin_ws/build```:
 ```$ make tests```
 
-execute
-~/devel/lib/rrt_star_global_planner
+and execute each test manually at ```~catkin_ws/devel/lib/rrt_star_global_planner```:
 ```$ ./test_rrt_star ```
 
 ## Errors and Issues
