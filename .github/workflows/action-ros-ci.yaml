@@ -10,18 +10,9 @@ jobs:
       matrix:
         env:
           - {ROS_DISTRO: melodic, ROS_REPO: main}
-          # - {ROS_DISTRO: noetic, ROS_REPO: main}
+          - {ROS_DISTRO: noetic, ROS_REPO: main}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Configure ROS for install
-        run: |
-          sudo apt-get install libgtest-dev
-          sudo apt-get install cmake
-          cd /usr/src/gtest
-          sudo cmake CMakeLists.txt
-          sudo make
-          sudo cp ./lib/libgtest.a /usr/lib
-          sudo cp ./lib/libgtest_main.a /usr/lib
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}
