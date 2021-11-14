@@ -187,10 +187,10 @@ std::vector<Node> RRTStar::getNodes() const {
 }
 
 void RRTStar::computeFinalPath(std::list<std::pair<float, float>> &path) {
-  //
   path.clear();
-  // New goal inside of the goal tolerance
-  Node current_node = nodes_.back();
+
+  // Compute the path from the goal to the start
+  Node current_node = goal_node_;
 
   // Final Path
   std::pair<float, float> point;
