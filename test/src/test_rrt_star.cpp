@@ -1,3 +1,7 @@
+/*
+  Copyright 2021 - Rafael Barreto
+*/
+
 #include <gtest/gtest.h>
 #include <ros/ros.h>
 
@@ -49,7 +53,6 @@ class RRTStarTest : public ::testing::Test {
   }
 
   RRTStar *rrt_star{nullptr};
-
 };
 
 TEST_F(RRTStarTest, ChooseTheBestParentForTheNewNode) {
@@ -58,7 +61,7 @@ TEST_F(RRTStarTest, ChooseTheBestParentForTheNewNode) {
 }
 
 TEST_F(RRTStarTest, RewireNodesAroundNewNode) {
-  const std::vector<Node> &nodes = rrt_star->getNodes(); 
+  const std::vector<Node> &nodes = rrt_star->getNodes();
   EXPECT_EQ(nodes[3].parent_id, 6);
 }
 
