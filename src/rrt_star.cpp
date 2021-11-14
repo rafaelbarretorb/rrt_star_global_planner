@@ -25,21 +25,16 @@ RRTStar::RRTStar(const std::pair<float, float> &start_point,
                                      max_num_nodes_(max_num_nodes),
                                      min_num_nodes_(min_num_nodes),
                                      map_width_(map_width),
-                                     map_height_(map_height) {
+                                     map_height_(map_height),
+                                     cd_(costmap) {
   // Set range
   random_double_.setRange(-map_width_, map_width_);
-
-  if(costmap_ != nullptr) {
-    resolution_ = costmap_->getResolution();
-    origin_x_ = costmap_->getOriginX();
-    origin_y_ = costmap_->getOriginY();
-  }
 }
 
 bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
   goal_reached_ = false;
 
-  if(collision(goal_point_.first, goal_point_.second)) {
+  if(cd_.isThisPointCollides(goal_point_.first, goal_point_.second)) {
     ROS_ERROR("Goal point chosen is NOT in the FREE SPACE! Choose other goal!");
     return false;
   }
@@ -59,7 +54,7 @@ bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
       p_rand = sampleFree();  // random point in the free space
       node_nearest = nodes_[getNearestNodeId(p_rand)];  // nearest node of the random point
       p_new = steer(node_nearest.x, node_nearest.y, p_rand.first, p_rand.second);  // new point and node candidate
-      if (obstacleFree(node_nearest, p_new.first, p_new.second)) {
+      if (!cd_.isThereObstacleBetween(node_nearest, p_new)) {
         found_next = true;
         createNewNode(p_new.first, p_new.second, node_nearest.node_id);
       }
@@ -100,68 +95,6 @@ int RRTStar::getNearestNodeId(const std::pair<float, float> &point) {
   return node_nearest.node_id;
 }
 
-bool RRTStar::collision(float wx, float wy) {
-  // In case of no costmap loaded
-  if(costmap_ == nullptr) {
-    // no collision 
-    return false;
-  }
-
-  // TODO check this method
-  int mx, my;
-  worldToMap(wx, wy, mx, my);
-
-  if ((mx < 0) || (my < 0) || (mx >= costmap_->getSizeInCellsX()) || (my >= costmap_->getSizeInCellsY()))
-    return true;
-
-  // TODO static_cast? check this 
-  unsigned int cost = static_cast<int>(costmap_->getCost(mx, my));
-  if (cost > 0)
-    return true;
-  
-  return false;
-}
-
-bool RRTStar::obstacleFree(const Node &node_nearest, float px, float py) {
-  // In case of no costmap loaded
-  if(costmap_ == nullptr) {
-    // no obstacles
-    return true;
-  }
-
-  int n = 1;
-  float theta;
-
-  std::pair<float, float> p_n;
-  p_n.first = 0.0;
-  p_n.second = 0.0;
-
-  float dist = euclideanDistance2D(node_nearest.x, node_nearest.y, px, py);
-  if (dist < resolution_) {
-    if (collision(px, py))
-      return false;
-    else
-      return true;
-  } else {
-    int value = int(floor(dist/resolution_));
-    float theta;
-    for (int i = 0; i < value; i++) {
-      theta = atan2(node_nearest.y - py, node_nearest.x - px);
-      p_n.first = node_nearest.x + n*resolution_*cos(theta);
-      p_n.second = node_nearest.y + n*resolution_*sin(theta);
-      if (collision(p_n.first, p_n.second))
-        return false;
-      
-      n++;
-    }
-    return true;
-  }
-}
-
-bool RRTStar::obstacleFree(const Node &node1, const Node &node2) {
-  return obstacleFree(node1, node2.x, node2.y);
-}
-
 void RRTStar::createNewNode(float x, float y, int node_nearest_id) {
   Node new_node(x, y, node_count_, node_nearest_id);
   nodes_.push_back(new_node);
@@ -197,7 +130,7 @@ void RRTStar::chooseParent(int node_nearest_id) {
       cost_other_parent = node.cost + nodes_dist;
 
       if (cost_other_parent < cost_new_node) {
-        if (obstacleFree(node, new_node)) {
+        if (!cd_.isThereObstacleBetween(node, new_node)) {
           parent_node = node;
         }
       }
@@ -224,7 +157,7 @@ void RRTStar::rewire() {
       // cost if the parent of node is new_node
       cost_node = new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
 
-      if(cost_node < node.cost && obstacleFree(node, new_node)) {
+      if(cost_node < node.cost && !cd_.isThereObstacleBetween(node, new_node)) {
         // update the new parent of node and its new cost
         node.parent_id = new_node.node_id;
         node.cost = cost_node;
@@ -277,11 +210,6 @@ bool RRTStar::isGoalReached(const std::pair<float, float> &p_new) {
                               p_new.second,
                               goal_point_.first,
                               goal_point_.second) < goal_tolerance_) ? true : false;
-}
-
-void RRTStar::worldToMap(float wx, float wy, int& mx, int& my) {
-  mx = (wx - origin_x_) / resolution_;
-  my = (wy - origin_y_) / resolution_;
 }
 
 }  // namespace rrt_star_global_planner

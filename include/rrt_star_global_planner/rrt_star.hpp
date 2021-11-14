@@ -16,13 +16,10 @@
 
 #include "rrt_star_global_planner/random_double_generator.hpp"
 #include "rrt_star_global_planner/node.hpp"
+#include "rrt_star_global_planner/collision_detector.hpp"
 
 
 namespace rrt_star_global_planner {
-
-inline float euclideanDistance2D(float x1, float y1, float x2, float y2) {
-  return std::hypot((x1 - x2), (y1 - y2));
-}
 
 class RRTStar {
  public:
@@ -43,12 +40,6 @@ class RRTStar {
 
   int getNearestNodeId(const std::pair<float, float> &point);
 
-  bool collision(float wx, float wy);
-
-  bool obstacleFree(const Node &node, float px, float py);
-
-  bool obstacleFree(const Node &node1, const Node &node2);
-
   void createNewNode(float x, float y, int node_nearest_id);
 
   void chooseParent(int node_nearest_id);
@@ -64,8 +55,6 @@ class RRTStar {
 
   bool isGoalReached(const std::pair<float, float> &p_new);
 
-  void worldToMap(float wx, float wy, int& mx, int& my);
-
  private:
   std::pair<float, float> start_point_;
   std::pair<float, float> goal_point_;
@@ -75,18 +64,17 @@ class RRTStar {
   int node_count_{0};
   float map_width_;
   float map_height_;
-  double radius_{1.3};  // TODO remove this initialization
+  double radius_;
   unsigned int max_num_nodes_;
   unsigned int min_num_nodes_;
   double goal_tolerance_;
   double epsilon_;
-  float resolution_;
-  float origin_x_;
-  float origin_y_;
 
   bool goal_reached_{false};
 
   Node goal_node_;
+
+  CollisionDetector cd_;
 };
 
 }  // namespace rrt_star_global_planner

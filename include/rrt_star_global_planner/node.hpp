@@ -1,6 +1,8 @@
 #ifndef RRT_STAR_GLOBAL_PLANNER_NODE_HPP_
 #define RRT_STAR_GLOBAL_PLANNER_NODE_HPP_
 
+#include <cmath>
+
 namespace rrt_star_global_planner {
 
 inline float euclideanDistance2D(float x1, float y1, float x2, float y2) {
