@@ -1,10 +1,8 @@
-/** 
- * Rafael Barreto, 2021
- * rrt_star_planner.hpp
- *
+/*
+  Copyright 2021 - Rafael Barreto
 */
 
-#ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_PLANNER_HPP_
+#ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_PLANNER_HPP_  // NOLINT
 #define RRT_STAR_GLOBAL_PLANNER_RRT_STAR_PLANNER_HPP_
 
 #include <ros/ros.h>
@@ -87,24 +85,20 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
    */
   bool makePlan(const geometry_msgs::PoseStamped& start,
                 const geometry_msgs::PoseStamped& goal,
-                std::vector<geometry_msgs::PoseStamped>& plan);
+                std::vector<geometry_msgs::PoseStamped>& plan);  // NOLINT
 
- 
   std::pair<float, float> sampleFree();
-protected:
 
-  void computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,
+ protected:
+  void computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,  // NOLINT
                         const std::list<std::pair<float, float>> &path);
 
   costmap_2d::Costmap2D* costmap_{NULL};
-  costmap_2d::Costmap2DROS* costmap_ros_{NULL};  // TODO chech to remove
   std::string frame_id_;
   ros::Publisher plan_pub_;
 
 
  private:
-  float origin_x_;
-  float origin_y_;
   float resolution_;
 
   bool initialized_{false};
@@ -122,9 +116,11 @@ protected:
   int node_count_{0};
   bool search_specific_area_{true};
 
-  // TODO
-  //bool allow_unknown_{false};
-  //boost::shared_ptr<NavFn> planner_;
+  // TODO(Rafael)
+  // bool allow_unknown_{false};
+  // boost::shared_ptr<NavFn> planner_;
 };
-}  // rrt_star_global_planner namespace
-#endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_PLANNER_HPP_
+
+}  // namespace rrt_star_global_planner
+
+#endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_PLANNER_HPP_  // NOLINT

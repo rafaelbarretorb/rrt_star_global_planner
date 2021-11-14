@@ -25,13 +25,14 @@ catkin_package(
 )
 
 include_directories(
-  include
+  ${PROJECT_SOURCE_DIR}/include
   ${catkin_INCLUDE_DIRS}
 )
 
 add_library(${PROJECT_NAME}
   src/rrt_star_planner.cpp
   src/rrt_star.cpp
+  src/collision_detector.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

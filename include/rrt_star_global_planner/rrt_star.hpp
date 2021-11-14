@@ -1,7 +1,8 @@
 /*
-
+  Copyright 2021 - Rafael Barreto
 */
-#ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
+
+#ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_  // NOLINT
 #define RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
 
 #include <ros/ros.h>
@@ -16,13 +17,10 @@
 
 #include "rrt_star_global_planner/random_double_generator.hpp"
 #include "rrt_star_global_planner/node.hpp"
+#include "rrt_star_global_planner/collision_detector.hpp"
 
 
 namespace rrt_star_global_planner {
-
-inline float euclideanDistance2D(float x1, float y1, float x2, float y2) {
-  return std::hypot((x1 - x2), (y1 - y2));
-}
 
 class RRTStar {
  public:
@@ -37,17 +35,11 @@ class RRTStar {
           float map_width,
           float map_height);
 
-  bool pathPlanning(std::list<std::pair<float, float>> &path);
+  bool pathPlanning(std::list<std::pair<float, float>> &path);  // NOLINT
 
   std::pair<float, float> sampleFree();
 
   int getNearestNodeId(const std::pair<float, float> &point);
-
-  bool collision(float wx, float wy);
-
-  bool obstacleFree(const Node &node, float px, float py);
-
-  bool obstacleFree(const Node &node1, const Node &node2);
 
   void createNewNode(float x, float y, int node_nearest_id);
 
@@ -55,40 +47,36 @@ class RRTStar {
 
   void rewire();
 
-  // TODO change parameters name
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
   std::vector<Node> getNodes() const;
 
-  void computeFinalPath(std::list<std::pair<float, float>> &path);
+  void computeFinalPath(std::list<std::pair<float, float>> &path);  // NOLINT
 
   bool isGoalReached(const std::pair<float, float> &p_new);
-
-  void worldToMap(float wx, float wy, int& mx, int& my);
 
  private:
   std::pair<float, float> start_point_;
   std::pair<float, float> goal_point_;
   costmap_2d::Costmap2D* costmap_{nullptr};
-  std::vector<Node> nodes_;
+  std::vector<Node> nodes_;  // TODO(Rafael) initialize size nodes_(max_num_nodes_)
   RandomDoubleGenerator random_double_;
   int node_count_{0};
   float map_width_;
   float map_height_;
-  double radius_{1.3};  // TODO remove this initialization
+  double radius_;
   unsigned int max_num_nodes_;
   unsigned int min_num_nodes_;
   double goal_tolerance_;
   double epsilon_;
-  float resolution_;
-  float origin_x_;
-  float origin_y_;
 
   bool goal_reached_{false};
 
   Node goal_node_;
+
+  CollisionDetector cd_;
 };
 
 }  // namespace rrt_star_global_planner
 
-#endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
+#endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_  NOLINT
