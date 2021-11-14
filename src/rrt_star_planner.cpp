@@ -6,9 +6,6 @@
 
 #include "rrt_star_global_planner/rrt_star_planner.hpp"
 
-
-// TODO(Rafael) set size of vector nodes_(max_num_nodes_)
-
 // register this planner as a BaseGlobalPlanner plugin
 PLUGINLIB_EXPORT_CLASS(rrt_star_global_planner::RRTStarPlanner, nav_core::BaseGlobalPlanner)
 
