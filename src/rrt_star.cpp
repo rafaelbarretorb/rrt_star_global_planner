@@ -1,5 +1,5 @@
 /*
-
+  Copyright 2021 - Rafael Barreto
 */
 
 #include "rrt_star_global_planner/rrt_star.hpp"
@@ -34,7 +34,7 @@ RRTStar::RRTStar(const std::pair<float, float> &start_point,
 bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
   goal_reached_ = false;
 
-  if(cd_.isThisPointCollides(goal_point_.first, goal_point_.second)) {
+  if (cd_.isThisPointCollides(goal_point_.first, goal_point_.second)) {
     ROS_ERROR("Goal point chosen is NOT in the FREE SPACE! Choose other goal!");
     return false;
   }
@@ -48,7 +48,7 @@ bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
   Node node_nearest;
 
   bool found_next;
-  while(nodes_.size() < max_num_nodes_) {
+  while (nodes_.size() < max_num_nodes_) {
     found_next = false;
     while (!found_next) {
       p_rand = sampleFree();  // random point in the free space
@@ -60,14 +60,14 @@ bool RRTStar::pathPlanning(std::list<std::pair<float, float>> &path) {
       }
     }
 
-    if(!goal_reached_) {
-      if(isGoalReached(p_new)) {
+    if (!goal_reached_) {
+      if (isGoalReached(p_new)) {
         goal_reached_ = true;
         goal_node_ = nodes_.back();
       }
     }
 
-    if(goal_reached_ && nodes_.size() > min_num_nodes_) {
+    if (goal_reached_ && nodes_.size() > min_num_nodes_) {
       computeFinalPath(path);
       return true;
     }
@@ -99,7 +99,7 @@ void RRTStar::createNewNode(float x, float y, int node_nearest_id) {
   Node new_node(x, y, node_count_, node_nearest_id);
   nodes_.push_back(new_node);
 
-  if(node_nearest_id != -1) {
+  if (node_nearest_id != -1) {
     // Optimize
     chooseParent(node_nearest_id);  // Select the best parent
     rewire();  // rewire
@@ -117,15 +117,15 @@ void RRTStar::chooseParent(int node_nearest_id) {
 
   Node &new_node = nodes_.back();
 
-  for(const auto &node : nodes_) {
-    if (node.node_id == new_node.node_id) break;  // TODO
+  for (const auto &node : nodes_) {
+    if (node.node_id == new_node.node_id) continue;
     // distance between node and new_node
     nodes_dist = euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
 
     if (nodes_dist < radius_) {
       // current cost of new_node
       cost_new_node = parent_node.cost + euclideanDistance2D(parent_node.x, parent_node.y, new_node.x, new_node.y);
-      
+
       // cost if the parent is node
       cost_other_parent = node.cost + nodes_dist;
 
@@ -148,16 +148,16 @@ void RRTStar::rewire() {
 
   Node new_node = nodes_.back();
 
-  for(auto &node : nodes_) {
+  for (auto &node : nodes_) {
     // distance between node and new_node
     nodes_dist = euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
 
     // check if node is already the parent and if node is near for optimization
-    if(node != nodes_[new_node.parent_id] && nodes_dist < radius_) {
+    if (node != nodes_[new_node.parent_id] && nodes_dist < radius_) {
       // cost if the parent of node is new_node
       cost_node = new_node.cost + euclideanDistance2D(node.x, node.y, new_node.x, new_node.y);
 
-      if(cost_node < node.cost && !cd_.isThereObstacleBetween(node, new_node)) {
+      if (cost_node < node.cost && !cd_.isThereObstacleBetween(node, new_node)) {
         // update the new parent of node and its new cost
         node.parent_id = new_node.node_id;
         node.cost = cost_node;
@@ -166,7 +166,7 @@ void RRTStar::rewire() {
   }
 }
 
-// TODO change parameters name
+// TODO(Rafael) improve parameters name
 std::pair<float, float> RRTStar::steer(float x1, float y1, float x2, float y2) {
   std::pair<float, float> p_new;
   float dist = euclideanDistance2D(x1, y1, x2, y2);

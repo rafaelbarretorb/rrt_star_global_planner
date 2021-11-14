@@ -1,36 +1,32 @@
 /*
-  Rafael Barreto, 2021
-  rrt_star_planner.cpp
-
+  Copyright 2021 - Rafael Barreto
 */
-
 
 #include <pluginlib/class_list_macros.h>
 
 #include "rrt_star_global_planner/rrt_star_planner.hpp"
 
 
-// TODO set size of vector nodes_(max_num_nodes_)
+// TODO(Rafael) set size of vector nodes_(max_num_nodes_)
 
-
-//register this planner as a BaseGlobalPlanner plugin
+// register this planner as a BaseGlobalPlanner plugin
 PLUGINLIB_EXPORT_CLASS(rrt_star_global_planner::RRTStarPlanner, nav_core::BaseGlobalPlanner)
 
 namespace rrt_star_global_planner {
 
-RRTStarPlanner::RRTStarPlanner() 
-  : costmap_(NULL), initialized_(false){}
+RRTStarPlanner::RRTStarPlanner() : costmap_(NULL), initialized_(false) {}
 
-RRTStarPlanner::RRTStarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
-  : costmap_(NULL), initialized_(false) {
-    //initialize the planner
-    initialize(name, costmap_ros);
+RRTStarPlanner::RRTStarPlanner(std::string name,
+                               costmap_2d::Costmap2DROS* costmap_ros) : costmap_(NULL), initialized_(false) {
+  // initialize the planner
+  initialize(name, costmap_ros);
 }
 
-RRTStarPlanner::RRTStarPlanner(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame)
-  : costmap_(NULL), initialized_(false) {
-    //initialize the planner
-    initialize(name, costmap, global_frame);
+RRTStarPlanner::RRTStarPlanner(std::string name,
+                               costmap_2d::Costmap2D* costmap,
+                               std::string global_frame) : costmap_(NULL), initialized_(false) {
+  // initialize the planner
+  initialize(name, costmap, global_frame);
 }
 
 void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros) {
@@ -41,7 +37,6 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap
   if (!initialized_) {
     // Initialize map
     costmap_ = costmap;
-    //costmap_ = costmap_ros->getCostmap();
 
     ros::NodeHandle private_nh("~/" + name);
     private_nh.param("goal_tolerance", goal_tolerance_, 0.5);
@@ -50,18 +45,14 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap
     private_nh.param("max_num_nodes", max_num_nodes_, 5000);
     private_nh.param("min_num_nodes", min_num_nodes_, 500);
 
-    // TODO check this
-    //world_model_.reset(new base_local_planner::CostmapModel(*costmap_));
-
-    // TODO Improve this
-    if(search_specific_area_) {
+    // TODO(Rafael) remove hard coding
+    if (search_specific_area_) {
       map_width_ = 10.0;
       map_height_ = 10.0;
     } else {
       map_width_ = costmap_->getSizeInMetersX();
       map_height_ = costmap_->getSizeInMetersY();
     }
-
 
     // Random
     random_double_.setRange(-map_width_, map_width_);
@@ -76,9 +67,7 @@ void RRTStarPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap
 bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
                               const geometry_msgs::PoseStamped& goal,
                               std::vector<geometry_msgs::PoseStamped>& plan) {
-  // TODO check if start and goal are in the free space, return false otherwise
-
-  //clear the plan, just in case
+  // clear the plan, just in case
   plan.clear();
   node_count_ = 0;
 
@@ -90,7 +79,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
   ROS_INFO("Current Position: ( %.2lf, %.2lf)", start.pose.position.x, start.pose.position.y);
   ROS_INFO("GOAL Position: ( %.2lf, %.2lf)", goal.pose.position.x, goal.pose.position.y);
 
-  // TODO remove this
+  // TODO(Rafael) remove this
   std::string global_frame = frame_id_;
 
   std::pair<float, float> start_point = {start.pose.position.x, start.pose.position.y};
@@ -108,7 +97,7 @@ bool RRTStarPlanner::makePlan(const geometry_msgs::PoseStamped& start,
 
   std::list<std::pair<float, float>> path;
 
-  if(rrt_star.pathPlanning(path)) {
+  if (rrt_star.pathPlanning(path)) {
     ROS_INFO("RRT* Global Planner: Path found!!!!");
     computeFinalPlan(plan, path);
     return true;
@@ -125,10 +114,10 @@ void  RRTStarPlanner::computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& 
   ros::Time plan_time = ros::Time::now();
 
   // convert points to poses
-  for(const auto &point : path) {
+  for (const auto &point : path) {
     geometry_msgs::PoseStamped pose;
     pose.header.stamp = plan_time;
-    pose.header.frame_id = "map";  // TODO remove hard coding
+    pose.header.frame_id = "map";  // TODO(Rafael) remove hard coding
     pose.pose.position.x = point.first;
     pose.pose.position.y = point.second;
     pose.pose.position.z = 0.0;
@@ -139,4 +128,5 @@ void  RRTStarPlanner::computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& 
     plan.push_back(pose);
   }
 }
-}  // RRTstar_planner namespace
+
+}  // namespace rrt_star_global_planner

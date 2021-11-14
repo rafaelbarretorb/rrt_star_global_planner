@@ -1,7 +1,10 @@
-#ifndef RRT_STAR_GLOBAL_PLANNER_COLLISION_DETECTOR_HPP_
+/*
+  Copyright 2021 - Rafael Barreto
+*/
+
+#ifndef RRT_STAR_GLOBAL_PLANNER_COLLISION_DETECTOR_HPP_  // NOLINT
 #define RRT_STAR_GLOBAL_PLANNER_COLLISION_DETECTOR_HPP_
 
-#include <iostream>
 #include <costmap_2d/costmap_2d.h>
 
 #include <utility>
@@ -23,7 +26,7 @@ class CollisionDetector {
   bool isThereObstacleBetween(const Node &node1, const Node &node2);
 
  private:
-  void worldToMap(float wx, float wy, int& mx, int& my);
+  void worldToMap(float wx, float wy, int& mx, int& my);  // NOLINT
 
   costmap_2d::Costmap2D* costmap_{nullptr};
   double resolution_{0.1};
@@ -33,4 +36,4 @@ class CollisionDetector {
 
 }  // namespace rrt_star_global_planner
 
-#endif  // RRT_STAR_GLOBAL_PLANNER_COLLISION_DETECTOR_HPP_
+#endif  // RRT_STAR_GLOBAL_PLANNER_COLLISION_DETECTOR_HPP_  NOLINT

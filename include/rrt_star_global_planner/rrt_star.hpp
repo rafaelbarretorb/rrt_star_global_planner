@@ -1,7 +1,8 @@
 /*
-
+  Copyright 2021 - Rafael Barreto
 */
-#ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
+
+#ifndef RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_  // NOLINT
 #define RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
 
 #include <ros/ros.h>
@@ -34,7 +35,7 @@ class RRTStar {
           float map_width,
           float map_height);
 
-  bool pathPlanning(std::list<std::pair<float, float>> &path);
+  bool pathPlanning(std::list<std::pair<float, float>> &path);  // NOLINT
 
   std::pair<float, float> sampleFree();
 
@@ -46,12 +47,11 @@ class RRTStar {
 
   void rewire();
 
-  // TODO change parameters name
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
   std::vector<Node> getNodes() const;
 
-  void computeFinalPath(std::list<std::pair<float, float>> &path);
+  void computeFinalPath(std::list<std::pair<float, float>> &path);  // NOLINT
 
   bool isGoalReached(const std::pair<float, float> &p_new);
 
@@ -79,4 +79,4 @@ class RRTStar {
 
 }  // namespace rrt_star_global_planner
 
-#endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_
+#endif  // RRT_STAR_GLOBAL_PLANNER_RRT_STAR_HPP_  NOLINT
