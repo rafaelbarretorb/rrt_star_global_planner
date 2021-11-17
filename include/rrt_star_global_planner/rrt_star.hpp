@@ -19,6 +19,9 @@
 #include "rrt_star_global_planner/node.hpp"
 #include "rrt_star_global_planner/collision_detector.hpp"
 
+// TODO(Rafael)
+// check if the path and plan have same size and values
+// test getNearestNodeId
 
 namespace rrt_star_global_planner {
 

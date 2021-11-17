@@ -21,6 +21,7 @@
 #include <vector>
 #include <list>
 #include <utility>  // std::pair
+#include <memory>
 
 
 #include "rrt_star_global_planner/node.hpp"
@@ -93,14 +94,10 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   void computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,  // NOLINT
                         const std::list<std::pair<float, float>> &path);
 
-  costmap_2d::Costmap2D* costmap_{NULL};
-  std::string frame_id_;
-  ros::Publisher plan_pub_;
+  costmap_2d::Costmap2D* costmap_{nullptr};
 
 
  private:
-  float resolution_;
-
   bool initialized_{false};
   int max_num_nodes_;
   int min_num_nodes_;
@@ -108,17 +105,10 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   float map_width_;
   float map_height_;
   double radius_;
-
-  std::vector<Node> nodes_;
-  Node goal_node_;
   double goal_tolerance_;
-  RandomDoubleGenerator random_double_;
-  int node_count_{0};
   bool search_specific_area_{true};
-
-  // TODO(Rafael)
-  // bool allow_unknown_{false};
-  // boost::shared_ptr<NavFn> planner_;
+  std::string global_frame_;
+  std::shared_ptr<RRTStar> planner_;
 };
 
 }  // namespace rrt_star_global_planner

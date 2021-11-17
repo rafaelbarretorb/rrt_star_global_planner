@@ -27,6 +27,7 @@ RRTStar::RRTStar(const std::pair<float, float> &start_point,
                                      map_width_(map_width),
                                      map_height_(map_height),
                                      cd_(costmap) {
+  nodes_.reserve(max_num_nodes_);
   // Set range
   random_double_.setRange(-map_width_, map_width_);
 }
@@ -97,7 +98,7 @@ int RRTStar::getNearestNodeId(const std::pair<float, float> &point) {
 
 void RRTStar::createNewNode(float x, float y, int node_nearest_id) {
   Node new_node(x, y, node_count_, node_nearest_id);
-  nodes_.push_back(new_node);
+  nodes_.emplace_back(new_node);
 
   if (node_nearest_id != -1) {
     // Optimize
