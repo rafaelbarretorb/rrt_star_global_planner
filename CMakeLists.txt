@@ -3,6 +3,9 @@ project(rrt_star_global_planner)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   costmap_2d
@@ -45,10 +48,9 @@ install(
 )
 
 if (CATKIN_ENABLE_TESTING)
+  enable_testing()
   find_package(GTest REQUIRED)
   find_package(rostest REQUIRED)
-
-  enable_testing()
 
   include_directories(
     include
@@ -64,7 +66,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_rrt_star
     ${catkin_LIBRARIES}
     ${PROJECT_NAME}
-    GTest::gtest
+    GTest::GTest
   )
 
 endif()
