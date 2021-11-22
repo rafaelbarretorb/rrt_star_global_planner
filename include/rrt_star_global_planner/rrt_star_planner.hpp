@@ -12,8 +12,8 @@
 #include <costmap_2d/costmap_2d.h>
 #include <nav_core/base_global_planner.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <base_local_planner/world_model.h>
-#include <base_local_planner/costmap_model.h>
+// #include <base_local_planner/world_model.h>
+// #include <base_local_planner/costmap_model.h>
 
 /** standard libraries **/
 #include <cmath>
@@ -78,7 +78,7 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   void initialize(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame);
 
   /**
-   * @brief Given a goal pose in the world, compute a plan
+   * @brief Given a start and goal pose in the world, compute a plan
    * @param start The start pose 
    * @param goal The goal pose 
    * @param plan The plan... filled by the planner
@@ -95,7 +95,6 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
                         const std::list<std::pair<float, float>> &path);
 
   costmap_2d::Costmap2D* costmap_{nullptr};
-
 
  private:
   bool initialized_{false};

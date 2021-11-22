@@ -46,6 +46,7 @@ class RRTStar {
 
   void createNewNode(float x, float y, int node_nearest_id);
 
+  // exposed for testing purposes; avoid direct production use:
   void chooseParent(int node_nearest_id);
 
   void rewire();
@@ -62,7 +63,7 @@ class RRTStar {
   std::pair<float, float> start_point_;
   std::pair<float, float> goal_point_;
   costmap_2d::Costmap2D* costmap_{nullptr};
-  std::vector<Node> nodes_;  // TODO(Rafael) initialize size nodes_(max_num_nodes_)
+  std::vector<Node> nodes_;
   RandomDoubleGenerator random_double_;
   int node_count_{0};
   float map_width_;

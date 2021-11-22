@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.2)
 project(rrt_star_global_planner)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -64,7 +64,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_rrt_star
     ${catkin_LIBRARIES}
     ${PROJECT_NAME}
-    GTest::GTest
+    GTest::gtest
   )
 
 endif()
