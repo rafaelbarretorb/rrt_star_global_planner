@@ -8,20 +8,37 @@
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d.h>
 
-/** standard libraries **/
 #include <cmath>
 #include <string>
 #include <vector>
 #include <list>
-#include <utility>  // std::pair
+#include <utility>
 
 #include "rrt_star_global_planner/random_double_generator.hpp"
 #include "rrt_star_global_planner/node.hpp"
 #include "rrt_star_global_planner/collision_detector.hpp"
 
-// TODO(Rafael)
-// check if the path and plan have same size and values
-// test getNearestNodeId
+
+
+
+
+
+
+
+  /**
+   * @brief 
+   * @param
+   * @return
+   */
+
+
+
+
+
+
+
+
+
 
 namespace rrt_star_global_planner {
 
@@ -38,19 +55,58 @@ class RRTStar {
           float map_width,
           float map_height);
 
+  /**
+   * @brief compute the RRT* path planning
+   * @param path list of planar positions (x, y)
+   * @return true if a path is found, false otherwise
+   */
   bool pathPlanning(std::list<std::pair<float, float>> &path);  // NOLINT
 
+  /**
+   * @brief compute random points
+   * @return random planar position (x, y)
+   */
   std::pair<float, float> sampleFree();
 
+  /**
+   * @brief Get the Index of the nearest node around the new random point
+   * @param point random pointed sampled
+   * @return the nearest node Index
+   * @note exposed for testing purposes
+   */
   int getNearestNodeId(const std::pair<float, float> &point);
 
+  /**
+   * @brief Create a new node
+   * @param x cartesian coordinate of the new node
+   * @param y cartesian coordinate of the new node
+   * @param node_nearest_id
+   * @note exposed for testing purposes
+   */
   void createNewNode(float x, float y, int node_nearest_id);
 
-  // exposed for testing purposes; avoid direct production use:
+  /**
+   * @brief RRT* near neighbour search step. Selection of the parent node with lowest cost
+   * @param node_nearest_id index of the nearest node around the new node
+   * @note exposed for testing purposes
+   */
   void chooseParent(int node_nearest_id);
 
+  /**
+   * @brief RRT* rewiring step. Search the best parent inside of the circular area of the new node
+   * @note exposed for testing purposes
+   */
   void rewire();
 
+  /**
+   * @brief Create a new node
+   * @param x1
+   * @param y1
+   * @param x2
+   * @param y2
+   * @return
+   * @note exposed for testing purposes
+   */
   std::pair<float, float> steer(float x1, float y1, float x2, float y2);
 
   std::vector<Node> getNodes() const;

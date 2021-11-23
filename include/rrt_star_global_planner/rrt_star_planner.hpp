@@ -7,34 +7,23 @@
 
 #include <ros/ros.h>
 
-/** for global path planner interface **/
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
 #include <nav_core/base_global_planner.h>
 #include <geometry_msgs/PoseStamped.h>
-// #include <base_local_planner/world_model.h>
-// #include <base_local_planner/costmap_model.h>
 
-/** standard libraries **/
 #include <cmath>
 #include <string>
 #include <vector>
 #include <list>
-#include <utility>  // std::pair
+#include <utility>
 #include <memory>
-
 
 #include "rrt_star_global_planner/node.hpp"
 #include "rrt_star_global_planner/rrt_star.hpp"
 #include "rrt_star_global_planner/random_double_generator.hpp"
 
 namespace rrt_star_global_planner {
-
-/**
- * @brief  Constructor for the RRTStarPlanner object
- * @param  name The name of this planner
- * @param  costmap A pointer to the ROS wrapper of the costmap to use
- */
 
 /**
  * @class RRTStarPlanner
