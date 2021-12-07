@@ -20,5 +20,4 @@ double RandomDoubleGenerator::generate() {
   return std::uniform_real_distribution {min_value_, std::nextafter(max_value_, DBL_MAX)}(gen);
 }
 
-
 }  // namespace rrt_star_global_planner

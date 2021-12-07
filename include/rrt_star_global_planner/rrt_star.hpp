@@ -19,27 +19,6 @@
 #include "rrt_star_global_planner/collision_detector.hpp"
 
 
-
-
-
-
-
-
-  /**
-   * @brief 
-   * @param
-   * @return
-   */
-
-
-
-
-
-
-
-
-
-
 namespace rrt_star_global_planner {
 
 class RRTStar {
@@ -98,12 +77,12 @@ class RRTStar {
    */
   void rewire();
 
-  /**
-   * @brief Create a new node
-   * @param x1
-   * @param y1
-   * @param x2
-   * @param y2
+  // TODO(Rafael) improve method name and parameters
+  // std::pair<float, float> connect(const std::pair<float, float> &p_new, int id_nearest_node);
+  /** 
+   * @brief Connect new point from a parent
+   * @param 
+   * @param 
    * @return
    * @note exposed for testing purposes
    */

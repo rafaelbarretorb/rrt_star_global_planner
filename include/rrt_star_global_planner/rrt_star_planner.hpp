@@ -27,13 +27,10 @@ namespace rrt_star_global_planner {
 
 /**
  * @class RRTStarPlanner
- * @brief Provides a ROS rrt* planner planner
+ * @brief Provides a ROS rrt* global planner plugin
  */
 class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
  public:
-  /**
-   * @brief  Default constructor for the RRTStarPlanner object
-   */
   RRTStarPlanner();
 
   /**
@@ -77,15 +74,11 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan);  // NOLINT
 
-  std::pair<float, float> sampleFree();
-
- protected:
   void computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,  // NOLINT
                         const std::list<std::pair<float, float>> &path);
 
-  costmap_2d::Costmap2D* costmap_{nullptr};
-
  private:
+  costmap_2d::Costmap2D* costmap_{nullptr};
   bool initialized_{false};
   int max_num_nodes_;
   int min_num_nodes_;
