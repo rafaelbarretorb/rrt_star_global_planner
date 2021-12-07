@@ -3,7 +3,8 @@ project(rrt_star_global_planner)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED
+  COMPONENTS
   roscpp
   costmap_2d
   pluginlib
@@ -25,7 +26,7 @@ catkin_package(
 )
 
 include_directories(
-  ${PROJECT_SOURCE_DIR}/include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -33,6 +34,7 @@ add_library(${PROJECT_NAME}
   src/rrt_star_planner.cpp
   src/rrt_star.cpp
   src/collision_detector.cpp
+  src/random_double_generator.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}

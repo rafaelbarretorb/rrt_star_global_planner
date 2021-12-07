@@ -19,20 +19,11 @@ class RandomDoubleGenerator {
   double max_value_{1.0};
 
  public:
-  RandomDoubleGenerator() {}
+  RandomDoubleGenerator() = default;
 
-  void setRange(double min, double max) {
-    min_value_ = min;
-    max_value_ = max;
-  }
+  void setRange(double min, double max);
 
-  double generate() {
-    std::mt19937 gen(rd_());
-
-    // Note: uniform_real_distribution does [start, stop), but we want to do [start, stop].
-    // Therefore passing the next largest value instead.
-    return std::uniform_real_distribution {min_value_, std::nextafter(max_value_, DBL_MAX)}(gen);
-  }
+  double generate();
 };
 }  // namespace rrt_star_global_planner
 
