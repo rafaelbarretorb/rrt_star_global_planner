@@ -49,6 +49,7 @@ install(
 )
 
 if (CATKIN_ENABLE_TESTING)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
   enable_testing()
   find_package(GTest REQUIRED)
   find_package(rostest REQUIRED)
