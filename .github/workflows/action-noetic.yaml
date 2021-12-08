@@ -1,6 +1,6 @@
 # Based on https://github.com/ros-industrial/industrial_ci
 
-name: CI-Noetic
+name: ROS_Industrial_CI-Noetic
 
 on:
   pull_request:
