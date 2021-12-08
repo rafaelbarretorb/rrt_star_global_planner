@@ -26,6 +26,7 @@
   <exec_depend>base_local_planner</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
 
+  <test_depend>cmake_modules</test_depend>
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
   <test_depend>rosunit</test_depend>
