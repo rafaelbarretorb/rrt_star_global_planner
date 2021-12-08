@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.2)
 project(rrt_star_global_planner)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(catkin REQUIRED COMPONENTS
+find_package(catkin REQUIRED
+  COMPONENTS
   roscpp
   costmap_2d
   pluginlib
@@ -25,7 +26,7 @@ catkin_package(
 )
 
 include_directories(
-  ${PROJECT_SOURCE_DIR}/include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -33,6 +34,7 @@ add_library(${PROJECT_NAME}
   src/rrt_star_planner.cpp
   src/rrt_star.cpp
   src/collision_detector.cpp
+  src/random_double_generator.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -45,15 +47,13 @@ install(
 )
 
 if (CATKIN_ENABLE_TESTING)
-  find_package(GTest REQUIRED)
-  find_package(rostest REQUIRED)
-
+  find_package(cmake_modules)
   enable_testing()
+  find_package(rostest REQUIRED)
 
   include_directories(
     include
     ${catkin_INCLUDE_DIRS}
-    ${GTEST_INCLUDE_DIRS}
   )
 
   add_rostest_gtest(test_rrt_star
@@ -64,7 +64,7 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(test_rrt_star
     ${catkin_LIBRARIES}
     ${PROJECT_NAME}
-    GTest::GTest
+    gtest
   )
 
 endif()

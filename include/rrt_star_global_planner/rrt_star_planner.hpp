@@ -7,21 +7,17 @@
 
 #include <ros/ros.h>
 
-/** for global path planner interface **/
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
 #include <nav_core/base_global_planner.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <base_local_planner/world_model.h>
-#include <base_local_planner/costmap_model.h>
 
-/** standard libraries **/
 #include <cmath>
 #include <string>
 #include <vector>
 #include <list>
-#include <utility>  // std::pair
-
+#include <utility>
+#include <memory>
 
 #include "rrt_star_global_planner/node.hpp"
 #include "rrt_star_global_planner/rrt_star.hpp"
@@ -30,20 +26,11 @@
 namespace rrt_star_global_planner {
 
 /**
- * @brief  Constructor for the RRTStarPlanner object
- * @param  name The name of this planner
- * @param  costmap A pointer to the ROS wrapper of the costmap to use
- */
-
-/**
  * @class RRTStarPlanner
- * @brief Provides a ROS rrt* planner planner
+ * @brief Provides a ROS rrt* global planner plugin
  */
 class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
  public:
-  /**
-   * @brief  Default constructor for the RRTStarPlanner object
-   */
   RRTStarPlanner();
 
   /**
@@ -77,7 +64,7 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   void initialize(std::string name, costmap_2d::Costmap2D* costmap, std::string global_frame);
 
   /**
-   * @brief Given a goal pose in the world, compute a plan
+   * @brief Given a start and goal pose in the world, compute a plan
    * @param start The start pose 
    * @param goal The goal pose 
    * @param plan The plan... filled by the planner
@@ -87,20 +74,11 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan);  // NOLINT
 
-  std::pair<float, float> sampleFree();
-
- protected:
   void computeFinalPlan(std::vector<geometry_msgs::PoseStamped>& plan,  // NOLINT
                         const std::list<std::pair<float, float>> &path);
 
-  costmap_2d::Costmap2D* costmap_{NULL};
-  std::string frame_id_;
-  ros::Publisher plan_pub_;
-
-
  private:
-  float resolution_;
-
+  costmap_2d::Costmap2D* costmap_{nullptr};
   bool initialized_{false};
   int max_num_nodes_;
   int min_num_nodes_;
@@ -108,17 +86,10 @@ class RRTStarPlanner : public nav_core::BaseGlobalPlanner {
   float map_width_;
   float map_height_;
   double radius_;
-
-  std::vector<Node> nodes_;
-  Node goal_node_;
   double goal_tolerance_;
-  RandomDoubleGenerator random_double_;
-  int node_count_{0};
   bool search_specific_area_{true};
-
-  // TODO(Rafael)
-  // bool allow_unknown_{false};
-  // boost::shared_ptr<NavFn> planner_;
+  std::string global_frame_;
+  std::shared_ptr<RRTStar> planner_;
 };
 
 }  // namespace rrt_star_global_planner

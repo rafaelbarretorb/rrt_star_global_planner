@@ -1,0 +1,34 @@
+name: ros-action-ci
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - docker_image: ubuntu:bionic
+            ros_distro: melodic
+          - docker_image: ubuntu:focal
+            ros_distro: noetic
+    container:
+      image: ${{ matrix.docker_image }}
+    env:
+        DISPLAY: :99
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v2
+      - name: setup ROS environment
+        uses: ros-tooling/setup-ros@v0.2
+        with:
+          required-ros-distributions: ${{ matrix.ros_distro }}
+      - name: build and test
+        uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          package-name: rrt_star_global_planner
+          target-ros1-distro: ${{ matrix.ros_distro }}

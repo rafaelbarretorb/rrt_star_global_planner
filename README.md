@@ -1,5 +1,5 @@
 # `rrt_star_global_planner`
-[![CI-Melodic](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml/badge.svg)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml) [![CI-Noetic](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml/badge.svg)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml)
+[![CI-Melodic](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml/badge.svg)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-melodic.yaml) [![CI-Noetic](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml/badge.svg)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-noetic.yaml) [![ros-action-ci](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-ros-ci.yaml/badge.svg)](https://github.com/rafaelbarretorb/rrt_star_global_planner/actions/workflows/action-ros-ci.yaml)
 
 
 <p float="left">
@@ -53,14 +53,13 @@ The Navigation Stack needs a perception sensor to work and the husky package doe
 
 ## Tutorial: Writing A Global Path Planner As Plugin in ROS
 
-I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation) and a few other plugin packages available at github to develop this package. After following all steps of the sessions 1 and 2  of the Tutorial:
+I followed the Tutorial [Writing A Global Path Planner As Plugin in ROS](http://wiki.ros.org/navigation/Tutorials/Writing%20A%20Global%20Path%20Planner%20As%20Plugin%20in%20ROS) and study the source code of the global_planner package of the [Navigation Stack](https://github.com/ros-planning/navigation). After following all steps of the sessions 1 and 2 of the Tutorial:
 
 **1. Writing the Path Planner Class**
 Same instructions.
 
 **2. Writing your Plugin**
 Same instructions.
-
 
 **3. Running the Plugin on the Husky Robot using Gazebo Simulator**
 
